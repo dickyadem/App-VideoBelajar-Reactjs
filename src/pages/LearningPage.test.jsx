@@ -56,7 +56,14 @@ test('opens purchased course at the first item, Pre-Test', () => {
   expect(previous).toBeDisabled();
   expect(next).toHaveTextContent('Memahami neraca dan laba rugi');
   expect(screen.getByRole('complementary', { name: 'Daftar modul' })).toBeInTheDocument();
+  expect(screen.queryByText('0% Modul Telah Selesai')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /Lihat progres modul/ }));
   expect(screen.getByText('0% Modul Telah Selesai')).toBeInTheDocument();
+  fireEvent.pointerDown(document.body);
+  expect(screen.queryByText('0% Modul Telah Selesai')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /Lihat progres modul/ }));
+  fireEvent.keyDown(document, { key: 'Escape' });
+  expect(screen.queryByText('0% Modul Telah Selesai')).not.toBeInTheDocument();
 });
 
 test('selects another lesson from the module list', () => {

@@ -43,20 +43,20 @@
 .payment-option-name { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .payment-selected { display: grid; place-items: center; visibility: hidden; flex: 0 0 20px; height: 20px; border-radius: 50%; color: white; background: #ff4b27; font-size: 15px; font-weight: 700; }
 .payment-option input:checked ~ .payment-selected { visibility: visible; }
-.payment-brand { display: grid; place-items: center; width: 28px; height: 28px; flex: 0 0 28px; color: var(--brand-color); font-size: 10px; font-weight: 900; letter-spacing: -.5px; }
-.payment-brand-bca, .payment-brand-bri { border: 1px solid currentColor; border-radius: 5px; font-style: italic; }
-.payment-brand-bni, .payment-brand-linkaja, .payment-brand-shopeepay { background: var(--brand-color); color: white; border-radius: 3px; }
-.payment-brand-linkaja { font-size: 8px; }
-.payment-brand-mandiri { font-size: 8px; border-top: 3px solid #fbbd17; }
-.payment-brand-dana, .payment-brand-ovo { border: 2px solid currentColor; border-radius: 50%; font-size: 8px; }
-.payment-brand-shopeepay { font-size: 19px; }
+
+
+
+
+
+
+
 .payment-card-brands { display: flex; align-items: center; gap: 14px; }
-.brand-mastercard { position: relative; display: flex; padding-bottom: 8px; }
-.brand-mastercard > span { width: 21px; height: 21px; border-radius: 50%; background: #e8001b; }
-.brand-mastercard > span + span { margin-left: -8px; background: #f7a600; opacity: .9; }
-.brand-mastercard small { position: absolute; bottom: -2px; width: 100%; text-align: center; font-size: 6px; color: #222; }
-.brand-visa { color: #075ca8; font-size: 25px; font-style: italic; font-weight: 900; letter-spacing: -1px; }
-.brand-jcb { border-radius: 4px; padding: 0 2px; background: linear-gradient(90deg, #0068b7 33%, #d91c39 33% 66%, #079846 66%); color: white; font-size: 17px; font-weight: 900; }
+
+
+
+
+
+
 .checkout-course { grid-area: course; padding: 22px; }
 .checkout-course-image { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 9px; margin-bottom: 18px; }
 .checkout-course h2 { margin: 0 0 18px; font-size: 20px; line-height: 1.2; }
@@ -123,3 +123,4 @@
   .summary-row { font-size: 14px; }
   .summary-total strong { font-size: 18px; }
 }
+.payment-logo-image { display: block; width: 64px; height: 32px; flex: 0 0 64px; object-fit: contain; }

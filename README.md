@@ -1,6 +1,6 @@
-﻿# videobelajar — ReactJS
+# videobelajar — ReactJS
 
-Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Navigasi menggunakan React Router dengan halaman Beranda, Kategori, Detail Kelas, Metode Pembayaran, Login, dan Register.
+Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Mencakup katalog kelas, simulasi pembayaran, profil, kelas saya, pembelajaran, penilaian, review, dan sertifikat. Navigasi menggunakan React Router.
 
 ## Teknologi
 
@@ -23,12 +23,24 @@ Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Navigasi menggun
 - Login dan registrasi simulasi yang mengarahkan pengguna ke Beranda.
 - Header dengan inisial pengguna, tombol keluar, dan menu navigasi mobile.
 - Status login bertahan setelah halaman dimuat ulang melalui `localStorage`.
+- Halaman profil, pesanan, dan kelas saya.
+- Halaman belajar dimulai dari Pre-Test, dilanjutkan video, rangkuman, Quiz, dan Ujian Akhir. Tombol sebelumnya/berikutnya mengikuti urutan daftar.
+- Progres dinamis dan centang hijau untuk materi selesai, tersimpan per nama akun dan slug kelas di browser.
+- Pre-Test, Quiz, dan Ujian Akhir dengan daftar soal, pilihan jawaban, konfirmasi pengumpulan, hasil nilai, serta tombol ulangi yang kembali ke aturan submodul terkait.
+- Download rangkuman `.txt` berisi deskripsi kelas dan daftar materi.
+- Modal **Beri Review & Rating** dengan pilihan 1–5 bintang, teks review, pembatalan, dan penyimpanan lokal.
+- Pop-up penyelesaian seluruh modul menuju halaman sertifikat dengan nama peserta, informasi kelas, dan download gambar SVG.
+- Layout mobile untuk halaman pembelajaran dan ujian, dengan tombol sentuh, teks jawaban, serta header progres yang disesuaikan.
 
 ### Batasan saat ini
 
 Data kelas berasal dari `src/data/courses.js`. Autentikasi dan newsletter masih berupa simulasi frontend tanpa backend; kredensial tidak diverifikasi oleh server dan newsletter tidak mengirim email. Tombol Google SSO, pemulihan kata sandi, dan filter Harga/Durasi belum memiliki fungsi lengkap.
 
-Tombol beli pada detail membuka metode pembayaran. Checkout merupakan simulasi tanpa payment gateway, pembayaran, atau pendaftaran kelas. Tidak ada data kartu yang diminta. Biaya admin tetap Rp7.000 adalah contoh untuk demo. Kurikulum, profil tutor, dan ulasan menggunakan konten demo; video, dokumen, ujian, dan sertifikat belum tersedia. Harga detail dan checkout mengikuti harga katalog.
+Tombol beli pada detail membuka metode pembayaran. Checkout merupakan simulasi tanpa payment gateway, pembayaran, atau pendaftaran kelas. Tidak ada data kartu yang diminta. Biaya admin tetap Rp7.000 adalah contoh untuk demo. Harga detail dan checkout mengikuti harga katalog.
+
+Kurikulum, profil tutor, ulasan, dan soal ujian menggunakan konten demo. Pemutar video belum memutar materi asli; progres video dicatat ketika berpindah lewat tombol next di bawah. Rangkuman merupakan deskripsi dan daftar materi, bukan transkrip video. Sertifikat SVG dibuat lokal dan belum diverifikasi atau diterbitkan oleh server.
+
+Login, progres, dan review memakai `localStorage`, sehingga tidak tersinkron antarperangkat/browser. Identitas penyimpanan progres dan review memakai nama akun serta slug kelas; perubahan nama akun dapat membuat data lama tidak terbaca, dan akun dengan nama sama berbagi data lokal. Proteksi route dan kelulusan di frontend bukan pengamanan backend.
 
 ## Menjalankan secara lokal
 
@@ -43,14 +55,45 @@ npm run dev
 
 Buka alamat yang ditampilkan Vite di terminal. Aplikasi saat ini tidak memerlukan konfigurasi `.env`.
 
+Di PowerShell, jika `npm.ps1` diblokir execution policy, gunakan `npm.cmd` sebagai pengganti `npm`.
+
 | URL | Halaman |
 | --- | --- |
 | `/` | Beranda dan koleksi kelas |
 | `/category` | Katalog, pencarian, dan filter kelas |
 | `/course/:slug` | Detail kelas, misalnya `/course/design-thinking-praktis` |
 | `/course/:slug/payment` | Pilihan metode pembayaran dan simulasi checkout untuk kelas tersebut |
+| `/course/:slug/pay` | Instruksi pembayaran dan hasil pembayaran demo |
+| `/profile` | Profil pengguna |
+| `/orders` | Pesanan pengguna |
+| `/classes` | Kelas saya |
+| `/learn/:slug` | Submodul belajar, rangkuman, dan progres |
+| `/learn/:slug/pretest` | Soal dan hasil Pre-Test |
+| `/learn/:slug/quiz` | Soal dan hasil Quiz |
+| `/learn/:slug/exam` | Soal dan hasil Ujian Akhir |
+| `/course/:slug/certificate` | Pratinjau dan download sertifikat setelah seluruh modul selesai |
 | `/login` | Form masuk |
 | `/register` | Form pendaftaran |
+
+Halaman pembayaran, profil, pesanan, kelas saya, belajar, ujian, dan sertifikat memerlukan login simulasi.
+
+## Menguji alur belajar sampai sertifikat
+
+1. Login, kemudian buka `/learn/big-4-auditor-financial-analyst`.
+2. Klik **Mulai Pre-Test**, lalu kumpulkan melalui **Selesaikan → Selesai**. Pengumpulan Pre-Test dihitung selesai tanpa syarat nilai.
+3. Kembali ke halaman belajar, pilih video pertama, dan gunakan tombol **next di bagian bawah** untuk melewati setiap video. Memilih video dari sidebar saja belum menandainya selesai.
+4. Pada submodul Rangkuman, klik **Download Rangkuman** untuk mencatat penyelesaian.
+5. Kerjakan Quiz dan Ujian Akhir dengan nilai minimal **60**. Untuk pengujian data demo saat ini, opsi pertama adalah jawaban benar pada setiap soal.
+6. Setelah semua selesai, progres kelas contoh menjadi **11/11** (7 video, Pre-Test, rangkuman, Quiz, dan Ujian Akhir). Jumlah mengikuti data kelas, bukan angka tetap.
+7. Pop-up **Modul sudah selesai** muncul. Klik **Ambil Sertifikat** untuk membuka halaman sertifikat, lalu **Download Sertifikat** untuk mengunduh SVG.
+
+Centang hijau menunjukkan materi selesai; latar hijau menunjukkan materi yang sedang dipilih. Ringkasan progres dibuka dengan mengklik angka progres di header dan ditutup dengan klik di luar, Escape, atau klik tombol lagi.
+
+Tombol **Ulangi** kembali ke aturan Pre-Test/Quiz/Ujian Akhir yang sesuai. Memulai lagi mengosongkan jawaban percobaan, tetapi tidak menghapus progres modul yang sebelumnya selesai.
+
+Untuk menguji review, klik **Beri Review & Rating**, pilih bintang dan isi review, lalu klik **Selesai**. Buka kembali untuk memeriksa hasil tersimpan. **Batal** membuang perubahan yang belum disimpan.
+
+Untuk mengulang progres dari nol, hapus key `videobelajar-progress:<nama>:<slug>` melalui DevTools → Application → Local Storage, lalu refresh. Review memakai key `videobelajar-review:<nama>:<slug>` dan status login memakai `videobelajar-user`.
 
 ## Pengujian dan build
 
@@ -60,6 +103,9 @@ npm test
 
 # Membuat hasil build produksi di dist/
 npm run build
+
+# Menguji bagian belajar dan sertifikat saja
+npm test -- src/pages/LearningPage.test.jsx src/pages/QuizPage.test.jsx src/components/CourseProgress.test.jsx src/components/ReviewButton.test.jsx src/pages/CertificatePage.test.jsx
 
 # Meninjau hasil build secara lokal
 npx vite preview
@@ -75,10 +121,10 @@ videobelajar/
 │   ├── main.jsx          # Entry point, router, provider, dan impor CSS
 │   ├── App.jsx           # Definisi route aplikasi
 │   ├── App.test.jsx      # Pengujian aplikasi
-│   ├── components/       # Header, Footer, CourseCard, form, dan komponen lain
+│   ├── components/       # Header, Footer, CourseProgress, ReviewButton, form, dll.
 │   ├── context/          # AuthContext dan pengujiannya
 │   ├── data/             # Data kelas dan pengujiannya
-│   ├── pages/            # Home, Category, CourseDetail, Login, Register, dan pengujian
+│   ├── pages/            # Katalog, checkout, belajar, Quiz, Certificate, dan pengujian
 │   └── test/setup.js     # Setup lingkungan pengujian
 ├── assets/css/           # Stylesheet yang diimpor oleh aplikasi React
 ├── public/assets/        # Logo dan ikon statis
@@ -106,5 +152,5 @@ Semua kelas menggunakan satu template `src/pages/CourseDetailPage.jsx` dengan st
 - Harga kelas disimpan sebagai angka rupiah (`priceAmount`) di `src/data/courses.js`; label harga katalog dan perhitungan checkout berasal dari nilai tersebut.
 - Kelompok metode, nama penyedia, dan biaya admin demo berada di `src/data/paymentMethods.js`. Pilihan awal adalah BCA; hanya satu metode aktif pada satu waktu.
 - `src/components/PaymentMethods.jsx` menangani pilihan dan accordion. `src/pages/PaymentMethodPage.jsx` menangani ringkasan dan tahapan simulasi, dengan styling di `assets/css/payment-method.css`.
-- Klik **Beli Sekarang** untuk meninjau metode dan total. **Ubah metode** kembali ke pilihan, sedangkan **Simulasikan pembayaran** menampilkan penyelesaian demo. Memuat ulang halaman mengulang simulasi dari awal.
-- Ringkasan kelas berada di kanan pada desktop dan di atas pilihan metode pada mobile; gambar kelas disembunyikan pada mobile. Penanda merek berupa teks/CSS sederhana lokal, tanpa dependensi layanan logo eksternal.
+- Alur pembayaran memakai `PaymentMethodPage.jsx` untuk pemilihan metode dan `PaymentPage.jsx` untuk instruksi serta hasil pembayaran demo. Memuat ulang halaman mengulang status simulasi pembayaran.
+- Ringkasan kelas berada di kanan pada desktop dan di atas pilihan metode pada mobile; gambar kelas disembunyikan pada mobile. Logo metode pembayaran memakai aset PNG lokal di `assets/images/`, termasuk bank, e-wallet, Mastercard, VISA, dan JCB.

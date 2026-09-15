@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { paymentGroups } from '../data/paymentMethods';
+import { paymentGroups, paymentLogos } from '../data/paymentMethods';
 
 export default function PaymentMethods({ selectedPayment, onChange }) {
   const [openGroup, setOpenGroup] = useState('bank');
@@ -19,10 +19,9 @@ export default function PaymentMethods({ selectedPayment, onChange }) {
             <input type="radio" name="payment-method" value={option.id} checked={selectedPayment === option.id}
               onChange={() => onChange(option.id)} aria-label={option.name} />
             {option.brands ? <span className="payment-card-brands" aria-hidden="true">
-              <span className="brand-mastercard"><span /><span /><small>mastercard</small></span>
-              <span className="brand-visa">VISA</span><span className="brand-jcb">JCB</span>
+              {option.brands.map((brand) => <img className="payment-logo-image" key={brand} src={paymentLogos[brand.toLowerCase()]} alt="" />)}
             </span> : <span className="payment-option-name">
-              <span className={`payment-brand payment-brand-${option.id}`} style={{ '--brand-color': option.color }} aria-hidden="true">{option.brand}</span>
+              <img className="payment-logo-image" src={paymentLogos[option.id]} alt="" />
               <span>{option.name}</span>
             </span>}
             <span className="payment-selected" aria-hidden="true">✓</span>

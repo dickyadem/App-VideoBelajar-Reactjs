@@ -9,3 +9,4 @@
 .certificate-popover a { display: block; padding: 10px; border-radius: 10px; color: white; background: #35ce42; text-align: center; text-decoration: none; font-weight: 700; }
 @media (max-width: 600px) { .course-progress progress { width: 60px; }.certificate-toggle { padding: 8px; gap: 4px; font-size: 12px; }.certificate-popover { position: fixed; top: 76px; right: 16px; } }
 .module-completed-icon { display: inline-flex !important; align-items: center; justify-content: center; flex: 0 0 20px; width: 20px; height: 20px; border-radius: 50%; color: white !important; background: #35ce42; font-size: 14px; font-weight: 700; line-height: 1; }
+.course-progress-count { border: 0; padding: 8px 0; background: transparent; cursor: pointer; font: inherit; }

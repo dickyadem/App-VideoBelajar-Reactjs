@@ -1,10 +1,12 @@
+import paymentSuccessImage from '../../assets/images/information-image/pembayaranSukses.webp';
+import paymentPendingImage from '../../assets/images/information-image/pembayaranTertunda.webp';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { courses } from '../data/courses';
 import { courseDetails } from '../data/courseDetails';
-import { ADMIN_FEE, formatRupiah, paymentGroups } from '../data/paymentMethods';
+import { ADMIN_FEE, formatRupiah, paymentGroups, paymentLogos } from '../data/paymentMethods';
 import '../../assets/css/payment-page.css';
 
 const instructions = [
@@ -42,7 +44,7 @@ function CourseSummary({ course, detail }) {
 function PaymentResult({ course, status }) {
   const pending = status === 'pending';
   return <section className={`payment-result ${pending ? 'is-pending' : 'is-success'}`} aria-labelledby="result-title">
-    <div className="payment-result-illustration" aria-hidden="true"><span>{pending ? '!' : '✓'}</span></div>
+    <img className="payment-result-image" src={pending ? paymentPendingImage : paymentSuccessImage} alt="" />
     <h1 id="result-title">{pending ? 'Pembayaran Tertunda' : 'Pembayaran Berhasil'}!</h1>
     <p>Silakan cek email kamu untuk informasi lebih lanjut. Hubungi kami jika ada kendala.</p>
     <Link className="btn btn-primary" to="/orders">Lihat Detail Pesanan</Link>
@@ -57,7 +59,7 @@ function PaymentPageContent({ course, detail, method, initialStatus = '' }) {
   const total = course.priceAmount + ADMIN_FEE;
   const virtualAccount = '11739081234567890';
   const copyAccount = async () => { try { await navigator.clipboard.writeText(virtualAccount); } catch {} setCopied(true); };
-  return <div className="payment-page"><header className="payment-header"><Link className="logo" to="/" aria-label="videobelajar Beranda"><img src="/assets/images/logo.png" alt="videobelajar" /></Link><div className="payment-header-mobile"><Header /></div><div className="payment-stepper-desktop"><Stepper complete={complete} /></div></header>{!complete && <Countdown />}<div className="payment-stepper-mobile"><Stepper complete={complete} /></div><main className="payment-container container">{complete ? <PaymentResult course={course} status={resultStatus} /> : <div className="payment-layout"><section><div className="payment-main-card"><h1 className="payment-title">Pembayaran</h1><div className="virtual-account-box"><strong className="payment-bank-logo">BCA</strong><p className="payment-method-label">Bayar Melalui Virtual Account <strong>{method.name}</strong></p><div className="virtual-account-number"><span>{virtualAccount}</span><button className="copy-button" type="button" onClick={copyAccount}>{copied ? 'Tersalin' : 'Salin'}</button></div></div><section className="order-summary" aria-labelledby="order-title"><h2 id="order-title">Ringkasan Pesanan</h2><div className="order-row"><span className="order-label">Video Learning: {course.title}</span><span className="order-price">{formatRupiah(course.priceAmount)}</span></div><div className="order-row"><span className="order-label">Biaya Admin</span><span className="order-price">{formatRupiah(ADMIN_FEE)}</span></div><div className="order-total"><span>Total Pembayaran</span><strong className="total-value">{formatRupiah(total)}</strong></div></section><div className="payment-actions"><button className="btn-change-payment" type="button" onClick={() => navigate(`/course/${course.slug}/payment?change=1`)}>Ganti Metode Pembayaran</button><button className="btn-pay-now" type="button" onClick={() => setResultStatus('success')}>Bayar Sekarang</button></div><p className="payment-demo">Mode demo - belum ada transaksi atau akses materi.</p></div><Instructions /></section><CourseSummary course={course} detail={detail} /></div>}</main><Footer /></div>;
+  return <div className="payment-page"><header className="payment-header"><Link className="logo" to="/" aria-label="videobelajar Beranda"><img src="/assets/images/logo.png" alt="videobelajar" /></Link><div className="payment-header-mobile"><Header /></div><div className="payment-stepper-desktop"><Stepper complete={complete} /></div></header>{!complete && <Countdown />}<div className="payment-stepper-mobile"><Stepper complete={complete} /></div><main className="payment-container container">{complete ? <PaymentResult course={course} status={resultStatus} /> : <div className="payment-layout"><section><div className="payment-main-card"><h1 className="payment-title">Pembayaran</h1><div className="virtual-account-box"><div className="payment-provider-logos">{(method.brands || [method.id]).map((brand) => <img key={brand} src={paymentLogos[brand.toLowerCase()]} alt={method.brands ? brand : method.name} />)}</div><p className="payment-method-label">Bayar Melalui Virtual Account <strong>{method.name}</strong></p><div className="virtual-account-number"><span>{virtualAccount}</span><button className="copy-button" type="button" onClick={copyAccount}>{copied ? 'Tersalin' : 'Salin'}</button></div></div><section className="order-summary" aria-labelledby="order-title"><h2 id="order-title">Ringkasan Pesanan</h2><div className="order-row"><span className="order-label">Video Learning: {course.title}</span><span className="order-price">{formatRupiah(course.priceAmount)}</span></div><div className="order-row"><span className="order-label">Biaya Admin</span><span className="order-price">{formatRupiah(ADMIN_FEE)}</span></div><div className="order-total"><span>Total Pembayaran</span><strong className="total-value">{formatRupiah(total)}</strong></div></section><div className="payment-actions"><button className="btn-change-payment" type="button" onClick={() => navigate(`/course/${course.slug}/payment?change=1`)}>Ganti Metode Pembayaran</button><button className="btn-pay-now" type="button" onClick={() => setResultStatus('success')}>Bayar Sekarang</button></div><p className="payment-demo">Mode demo - belum ada transaksi atau akses materi.</p></div><Instructions /></section><CourseSummary course={course} detail={detail} /></div>}</main><Footer /></div>;
 }
 
 export default function PaymentPage() {

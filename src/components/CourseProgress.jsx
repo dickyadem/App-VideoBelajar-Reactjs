@@ -49,7 +49,14 @@ export default function CourseProgress({ progress, course }) {
         <p>{progress.count} dari {progress.total} modul telah selesai, silakan download sertifikat</p>
         <Link to={`/course/${course?.slug}/certificate`}>Ambil Sertifikat</Link>
       </section>}
-    </> : <div className="course-progress-count"><progress value={progress.count} max={progress.total} aria-label="Progres modul" /><b>{progress.count}/{progress.total}</b></div>}
+    </> : <>
+      <button type="button" className="course-progress-count" aria-label={`Lihat progres modul: ${progress.count}/${progress.total}`} aria-expanded={open} aria-controls={id} onClick={() => setOpen(!open)}><progress value={progress.count} max={progress.total} aria-label="Progres modul" /><b>{progress.count}/{progress.total}</b><span aria-hidden="true">⌄</span></button>
+      {open && <section className="certificate-popover" id={id} aria-label="Progres kelas">
+        <h2>{Math.round(progress.count / progress.total * 100)}% Modul Telah Selesai</h2>
+        <p>Selesaikan Semua Modul Untuk Mendapatkan Sertifikat</p>
+        <small>{progress.count} dari {progress.total} modul selesai</small>
+      </section>}
+    </>}
     {progress.error && <span role="alert">{progress.error}</span>}
   </div>;
 }
