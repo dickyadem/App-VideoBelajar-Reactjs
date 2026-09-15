@@ -97,6 +97,19 @@ Untuk mengulang progres dari nol, hapus key `videobelajar-progress:<nama>:<slug>
 
 ## Pengujian dan build
 
+### GitHub Pages
+
+Konfigurasi build menggunakan base `/App-VideoBelajar-Reactjs/` dan `HashRouter` agar route bisa dimuat ulang di hosting statis. URL aplikasi menggunakan `/#/`, misalnya `https://dickyadem.github.io/App-VideoBelajar-Reactjs/#/category`. Saat development gunakan alamat Vite dengan `/#/learn/...` untuk membuka halaman belajar langsung.
+
+1. Push perubahan proyek ke branch `main`.
+2. Buka repository → **Settings → Pages**, lalu pilih **GitHub Actions** sebagai Source.
+3. Workflow `.github/workflows/deploy.yml` menjalankan instalasi, tes, build, dan deploy. Bisa dijalankan ulang melalui **Actions → Deploy to GitHub Pages → Run workflow**.
+4. Setelah workflow berhasil, buka `https://dickyadem.github.io/App-VideoBelajar-Reactjs/`.
+
+Hasil build berada di `dist/`; folder ini tidak perlu di-commit. Jika nama repository berubah, sesuaikan `base` di `vite.config.js`. Panduan: [Deploy Vite ke GitHub Pages](https://vite.dev/guide/static-deploy#github-pages).
+
+### Perintah
+
 ```sh
 # Menjalankan pengujian sekali
 npm test

@@ -70,12 +70,12 @@ test('copies a shareable course URL', async () => {
   open(`/course/${slugs[0]}`);
   fireEvent.click(screen.getByRole('button', { name: 'Bagikan Kelas' }));
   expect(await screen.findByText('Tautan kelas berhasil disalin.')).toBeInTheDocument();
-  expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/course/${slugs[0]}`);
+  expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/#/course/${slugs[0]}`);
 });
 
 test.each([undefined, { writeText: () => Promise.reject(new Error('denied')) }])('offers a manual share link when clipboard fails', async (clipboard) => {
   vi.stubGlobal('navigator', { clipboard });
   open(`/course/${slugs[0]}`);
   fireEvent.click(screen.getByRole('button', { name: 'Bagikan Kelas' }));
-  expect(await screen.findByRole('textbox', { name: 'Tautan kelas' })).toHaveValue(`${window.location.origin}/course/${slugs[0]}`);
+  expect(await screen.findByRole('textbox', { name: 'Tautan kelas' })).toHaveValue(`${window.location.origin}/#/course/${slugs[0]}`);
 });

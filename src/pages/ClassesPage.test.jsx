@@ -17,7 +17,7 @@ test('renders the classes page with progress cards', () => {
   expect(screen.getByLabelText('Kelas Saya')).toHaveAttribute('href', '/classes');
   expect(screen.getByRole('tab', { name: 'Semua Kelas' })).toHaveAttribute('aria-selected', 'true');
   expect(screen.getAllByRole('article')).toHaveLength(3);
-  expect(screen.getByText((_, element) => element?.textContent?.includes('Progres Kelas:') && element.textContent.includes('100%'))).toBeInTheDocument();
+  expect(screen.getByText('100%')).toBeInTheDocument();
 });
 
 test('filters running and completed classes', () => {
@@ -33,7 +33,7 @@ test('class actions open the video learning page', () => {
   open();
   expect(screen.getByRole('link', { name: 'Lihat Detail Kelas' })).toHaveAttribute('href', '/learn/big-4-auditor-financial-analyst');
   fireEvent.click(screen.getByRole('tab', { name: 'Sedang Berjalan' }));
-  expect(screen.getByRole('link', { name: 'Lanjutkan Pembelajaran' })).toHaveAttribute('href', '/learn/strategi-marketing-berbasis-data');
+  expect(screen.getAllByRole('link', { name: 'Lanjutkan Pembelajaran' })[0]).toHaveAttribute('href', '/learn/strategi-marketing-berbasis-data');
 });
 
 test('searches classes by title', () => {

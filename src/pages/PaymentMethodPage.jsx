@@ -23,7 +23,7 @@ function Checkout({ course, detail }) {
 
   return <div className="checkout-page">
     <header className="checkout-header">
-      <div className="checkout-desktop-logo"><Link className="logo" to="/" aria-label="videobelajar Beranda"><img src="/assets/images/logo.png" alt="videobelajar" /></Link></div>
+      <div className="checkout-desktop-logo"><Link className="logo" to="/" aria-label="videobelajar Beranda"><img src={`${import.meta.env.BASE_URL}assets/images/logo.png`} alt="videobelajar" /></Link></div>
       <div className="checkout-mobile-header"><Header /></div>
       <nav className="checkout-progress" aria-label="Tahapan pembayaran">
         <ol>{['Pilih Metode', 'Bayar', 'Selesai'].map((label, index) => <li key={label}

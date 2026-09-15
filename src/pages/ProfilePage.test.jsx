@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test } from 'vitest';
 import App from '../App';
 import { AuthProvider } from '../context/AuthContext';
 
-beforeEach(() => localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky Adem', isLoggedIn: true }));
+beforeEach(() => localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky Adem', isLoggedIn: true })));
 afterEach(() => { cleanup(); localStorage.clear(); });
 
 function open(path = '/profile') {

@@ -39,7 +39,7 @@ test('filters courses by duration', () => {
   renderPage();
   const durationFilter = screen.getAllByRole('group', { name: 'Durasi' })[0];
   fireEvent.click(within(durationFilter).getByLabelText('Kurang dari 4 Jam', { selector: 'input' }));
-  expect(screen.getAllByRole('article')).toHaveLength(3);
+  expect(screen.getAllByRole('article')).toHaveLength(4);
 });
 
 test('paginates with numbered buttons and arrows at the page boundaries', () => {

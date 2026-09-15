@@ -7,7 +7,7 @@ export default function PurchaseCard({ course, modules }) {
   const videoCount = modules.reduce((total, section) => total + section.lessons.length, 0);
 
   async function share() {
-    const url = new URL(`/course/${course.slug}`, window.location.origin).href;
+    const url = new URL(`${import.meta.env.BASE_URL}#/course/${course.slug}`, window.location.origin).href;
     try {
       await navigator.clipboard.writeText(url);
       setShareUrl('');
