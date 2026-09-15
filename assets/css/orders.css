@@ -2,7 +2,7 @@
 .orders-sidebar h1 { margin: 0; font-size: 16px; }
 .orders-sidebar > p { margin: 3px 0 22px; color: var(--muted); font-size: 11px; line-height: 1.35; }
 .orders-sidebar nav { display: grid; gap: 0; padding: 10px 12px; background: white; border: 1px solid var(--line); border-radius: 6px; }
-.orders-nav-item { display: flex; gap: 10px; align-items: center; padding: 10px 7px; color: #b0b0b8; font-size: 12px; }
+.orders-nav-item { display: flex; gap: 10px; align-items: center; padding: 10px 14px; color: #b0b0b8; font-size: 12px; }
 .orders-nav-item.is-active { color: var(--accent); background: #fff6df; border: 1px solid #ffbd35; }
 .orders-tabs { display: flex; align-items: end; gap: 26px; min-height: 45px; border-bottom: 1px solid var(--line); }
 .orders-tabs button { padding: 0 0 11px; color: var(--muted); background: none; border: 0; border-bottom: 2px solid transparent; font-size: 12px; cursor: pointer; }
@@ -38,7 +38,7 @@
   .orders-sidebar h1 { font-size: 18px; }
   .orders-sidebar > p { font-size: 12px; }
   .orders-sidebar nav { padding: 10px 14px; }
-  .orders-nav-item { padding: 10px 0; font-size: 13px; }
+  .orders-nav-item { padding: 10px 14px; font-size: 13px; }
   .orders-content { padding: 18px 14px; background: white; border: 1px solid var(--line); border-radius: 8px; }
   .orders-tabs { overflow-x: auto; justify-content: flex-start; gap: 28px; white-space: nowrap; }
   .orders-tabs button { flex: 0 0 auto; font-size: 11px; }
