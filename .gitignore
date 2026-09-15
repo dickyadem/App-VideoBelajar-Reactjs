@@ -1,0 +1,34 @@
+/docs/
+
+# Dependencies
+node_modules/
+
+# Build dan laporan pengujian
+dist/
+dist-ssr/
+coverage/
+.vite/
+
+# Environment lokal (template tetap disimpan di Git)
+.env
+.env.*
+!.env.example
+!.env.sample
+*.local
+
+# Log dan cache
+*.log
+.eslintcache
+*.tsbuildinfo
+
+# Pengaturan editor lokal
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# File sistem operasi
+.DS_Store
+Thumbs.db
+Desktop.ini

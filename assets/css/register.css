@@ -1,0 +1,2 @@
+.phone-row { display:grid; grid-template-columns:104px 1fr; gap:8px; }
+.country-code { display:grid; place-items:center; min-height:44px; color:var(--muted); background:white; border:1px solid #d1d5db; border-radius:4px; font-size:14px; }
