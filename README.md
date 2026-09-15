@@ -1,5 +1,7 @@
 # videobelajar — ReactJS
 
+**Live demo:** [Buka VideoBelajar](https://dickyadem.github.io/App-VideoBelajar-Reactjs/)
+
 Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Mencakup katalog kelas, simulasi pembayaran, profil, kelas saya, pembelajaran, penilaian, review, dan sertifikat. Navigasi menggunakan React Router.
 
 ## Teknologi
