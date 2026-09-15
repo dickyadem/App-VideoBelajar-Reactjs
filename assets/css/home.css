@@ -14,6 +14,8 @@
 .course-card { position:relative; display:flex; flex-direction:column; overflow:hidden; background:white; border:1px solid var(--line); border-radius:12px; transition:transform .2s,box-shadow .2s; }
 .course-card:hover { transform:translateY(-4px); box-shadow:0 10px 20px rgba(0,0,0,.05); }
 .course-card[hidden] { display:none !important; }
+.course-detail-link::after { content:''; position:absolute; inset:0; }
+.course-card:focus-within { outline:3px solid var(--primary-dark); outline-offset:3px; }
 .course-image { width:100%; height:200px; display:block; object-fit:cover; }
 .course-body { display:flex; flex-direction:column; flex-grow:1; padding:20px; }
 .course-body h3 { margin:0 0 8px; color:var(--ink); font-size:18px; line-height:1.3; }

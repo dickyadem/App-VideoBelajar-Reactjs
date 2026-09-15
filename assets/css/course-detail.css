@@ -1,0 +1,86 @@
+.course-detail { padding-bottom: 64px; }
+.detail-breadcrumb { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin: 44px 0 32px; color: var(--muted); font-size: 14px; }
+.detail-breadcrumb [aria-current] { color: var(--ink); }
+.detail-breadcrumb a:hover { color: var(--primary-dark); text-decoration: underline; }
+.detail-hero { display: flex; align-items: center; min-height: 360px; padding: 64px 80px; border-radius: 10px; background-color: #222; background-size: cover; background-position: center; color: white; }
+.detail-hero h1 { max-width: 800px; margin: 0 0 16px; font-size: clamp(28px, 3.4vw, 40px); line-height: 1.15; }
+.detail-hero p { margin: 0 0 20px; color: #e5e7eb; }
+.detail-rating { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; }
+.detail-stars { background: linear-gradient(to right, #e8bc00 70%, #c7c7c7 70%); background-clip: text; -webkit-background-clip: text; color: transparent; font-size: 21px; letter-spacing: 1px; }
+.detail-hero .detail-rating > span:last-child { text-decoration: underline; }
+.detail-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, .92fr); gap: 32px; align-items: start; margin-top: 32px; }
+.detail-sections { display: grid; gap: 28px; min-width: 0; }
+.detail-panel { min-width: 0; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.detail-panel h2 { margin: 0 0 20px; font-size: 20px; line-height: 1.3; }
+.detail-panel p { font-size: 15px; }
+.detail-muted { margin: 0; color: var(--muted); }
+.detail-person { padding: 18px; border: 1px solid var(--line); border-radius: 8px; }
+.detail-person-heading { display: flex; align-items: center; gap: 12px; }
+.detail-person-heading img, .review-avatar { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 8px; background: var(--primary-soft); }
+.review-avatar { display: grid; place-items: center; color: var(--primary-dark); font-weight: 700; font-size: 14px; }
+.detail-person-heading h3 { margin: 0; font-size: 15px; }
+.detail-person-heading p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+.detail-person > p { margin: 14px 0 0; }
+.detail-person .detail-rating { margin-top: 16px; color: var(--muted); }
+.detail-review-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.detail-demo-note { margin: 0 0 16px; color: var(--muted); font-size: 12px !important; }
+#course-reviews { scroll-margin-top: 24px; }
+.curriculum details + details { margin-top: 8px; }
+.curriculum summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; color: var(--primary-dark); cursor: pointer; font-weight: 700; list-style: none; }
+.curriculum summary::-webkit-details-marker { display: none; }
+.curriculum-chevron { color: var(--muted); font-size: 22px; line-height: 1; }
+.curriculum details[open] .curriculum-chevron { transform: rotate(180deg); }
+.curriculum ul { display: grid; gap: 12px; margin: 0 0 12px; padding: 0; list-style: none; }
+.curriculum li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; }
+.lesson-meta { display: flex; flex-shrink: 0; gap: 14px; color: var(--muted); font-size: 12px; }
+.purchase-card { position: sticky; top: 24px; }
+.purchase-card h2 { font-size: 19px; }
+.purchase-card .detail-price { margin: 0 0 8px; color: var(--primary-dark); font-size: 24px; font-weight: 800; }
+.purchase-note { margin: 0 0 20px; color: var(--muted); font-size: 13px !important; }
+.purchase-card .btn { width: 100%; margin-bottom: 12px; box-shadow: none; }
+.purchase-card .detail-outline { background: white; border: 1px solid var(--primary); color: var(--primary-dark); }
+.detail-outline:hover { background: var(--primary-soft); }
+.purchase-card h3 { margin: 20px 0 12px; font-size: 14px; }
+.course-inclusions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: 13px; }
+.course-inclusions li { display: flex; gap: 8px; align-items: center; }
+.course-inclusions li span { width: 16px; text-align: center; }
+.purchase-feedback { margin: 0; color: var(--primary-dark); font-size: 13px !important; }
+.purchase-feedback:empty { display: none; }
+.purchase-card .detail-demo-note { margin: 20px 0 0; }
+.share-field { display: grid; gap: 6px; margin-top: 12px; font-size: 13px; }
+.share-field input { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--line); border-radius: 6px; }
+.detail-related { margin-top: 36px; }
+.detail-related h2 { margin: 0 0 6px; font-size: clamp(24px, 3vw, 32px); line-height: 1.3; }
+.detail-related-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 28px; }
+.detail-related .course-image { padding: 16px 16px 0; border-radius: 24px 24px 0 0; }
+.detail-not-found { min-height: 45vh; padding-top: 64px; padding-bottom: 64px; }
+.course-detail :focus-visible { outline: 3px solid var(--primary-dark); outline-offset: 4px; }
+
+@media (max-width: 1023px) {
+  .detail-layout { grid-template-columns: minmax(0, 1fr); }
+  .purchase-card { position: static; }
+  .detail-related-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .detail-hero { padding: 40px; }
+}
+
+@media (max-width: 767px) {
+  .detail-breadcrumb { flex-wrap: nowrap; gap: 8px; margin: 24px 0; font-size: 12px; }
+  .detail-breadcrumb > a, .detail-breadcrumb > [aria-hidden] { flex-shrink: 0; }
+  .detail-breadcrumb [aria-current] { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .detail-hero { min-height: 400px; padding: 24px 20px; }
+  .detail-hero h1 { font-size: 26px; line-height: 1.3; }
+  .detail-hero p { font-size: 14px; }
+  .detail-panel { padding: 20px; }
+  .detail-layout, .detail-sections { gap: 24px; }
+  .detail-layout { margin-top: 24px; }
+  .detail-layout > .purchase-card { order: -1; }
+  .detail-review-grid, .detail-related-grid { grid-template-columns: minmax(0, 1fr); }
+  .curriculum li { align-items: flex-start; flex-direction: column; gap: 8px; padding: 14px; }
+  .curriculum .lesson-meta { display: none; }
+  .detail-related { margin-top: 32px; }
+  .course-detail { padding-bottom: 40px; }
+}
+
+@media (max-width: 640px) {
+  .detail-related .course-image { padding: 0; border-radius: 6px; }
+}
