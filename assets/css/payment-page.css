@@ -1,4 +1,6 @@
-.payment-page { min-height: 100vh; background: var(--page); }
+.payment-page { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; background: var(--page); }
+.payment-page > main { flex: 1; }
+.payment-page > header, .payment-page > footer { flex-shrink: 0; }
 .payment-header { min-height: 80px; display: grid; grid-template-columns: minmax(24px, 1fr) minmax(0, 600px) minmax(0, 600px) minmax(24px, 1fr); align-items: center; background: white; border-bottom: 1px solid var(--line); }
 .payment-header > .logo { grid-column: 2; }
 .payment-header > .logo img { width: 195px; }
