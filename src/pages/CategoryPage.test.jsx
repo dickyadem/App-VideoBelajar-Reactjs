@@ -27,6 +27,21 @@ test('filters courses when a study checkbox is selected', () => {
   expect(screen.getByRole('heading', { name: 'Design Thinking Praktis' })).toBeInTheDocument();
 });
 
+test('filters courses by price', () => {
+  renderPage();
+  const priceFilter = screen.getAllByRole('group', { name: 'Harga' })[0];
+  fireEvent.click(within(priceFilter).getByLabelText('Di bawah Rp 200K', { selector: 'input' }));
+  expect(screen.getAllByRole('article')).toHaveLength(1);
+  expect(screen.getByRole('heading', { name: 'Fokus dan Produktif Setiap Hari' })).toBeInTheDocument();
+});
+
+test('filters courses by duration', () => {
+  renderPage();
+  const durationFilter = screen.getAllByRole('group', { name: 'Durasi' })[0];
+  fireEvent.click(within(durationFilter).getByLabelText('Kurang dari 4 Jam', { selector: 'input' }));
+  expect(screen.getAllByRole('article')).toHaveLength(3);
+});
+
 test('paginates with numbered buttons and arrows at the page boundaries', () => {
   renderPage();
   const pagination = screen.getByRole('navigation', { name: 'Paginasi' });

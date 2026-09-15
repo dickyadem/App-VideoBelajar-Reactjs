@@ -8,7 +8,8 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(readUser);
   useEffect(() => { if (user) localStorage.setItem(key, JSON.stringify(user)); else localStorage.removeItem(key); }, [user]);
   const login = (name) => setUser({ name, isLoggedIn: true });
+  const updateUser = (updates) => setUser((current) => current ? { ...current, ...updates, isLoggedIn: true } : current);
   const logout = () => setUser(null);
-  return <AuthContext.Provider value={{ user, login, logout }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, login, updateUser, logout }}>{children}</AuthContext.Provider>;
 }
 export const useAuth = () => useContext(AuthContext);

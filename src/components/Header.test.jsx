@@ -25,7 +25,12 @@ test('shows Login and Register to a guest', () => {
 test('shows initials and logout action to a signed-in user', () => {
   localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky Adem', isLoggedIn: true }));
   renderHeader();
-  expect(screen.getByLabelText('Profil Dicky Adem')).toHaveTextContent('DA');
+  const profileButton = screen.getByRole('button', { name: 'Buka menu profil Dicky Adem' });
+  expect(profileButton).toHaveTextContent('DA');
+  fireEvent.click(profileButton);
+  expect(screen.getByRole('link', { name: 'Profil Saya' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Kelas Saya' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Pesanan Saya' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Keluar' })).toBeInTheDocument();
   expect(screen.queryByRole('link', { name: 'Login' })).not.toBeInTheDocument();
 });
@@ -33,7 +38,17 @@ test('shows initials and logout action to a signed-in user', () => {
 test('logout restores guest actions', () => {
   localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky', isLoggedIn: true }));
   renderHeader();
+  fireEvent.click(screen.getByRole('button', { name: 'Buka menu profil Dicky' }));
   fireEvent.click(screen.getByRole('button', { name: 'Keluar' }));
   expect(screen.getByRole('link', { name: 'Login' })).toBeInTheDocument();
   expect(localStorage.getItem('videobelajar-user')).toBeNull();
+});
+
+test('opens the profile links with the mobile menu', () => {
+  localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky', isLoggedIn: true }));
+  renderHeader();
+  fireEvent.click(screen.getByRole('button', { name: 'Buka menu' }));
+  expect(screen.getByRole('link', { name: 'Profil Saya' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Kelas Saya' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Pesanan Saya' })).toBeInTheDocument();
 });

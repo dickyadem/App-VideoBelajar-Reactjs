@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function PurchaseCard({ course, modules }) {
   const [message, setMessage] = useState('');
@@ -22,10 +23,7 @@ export default function PurchaseCard({ course, modules }) {
       <h2>{course.title}</h2>
       <p className="detail-price">{course.price}</p>
       <p className="purchase-note">Belajar sesuai ritmemu, kapan pun dan di mana pun.</p>
-      <button className="btn btn-primary" type="button" onClick={() => {
-        setShareUrl('');
-        setMessage('Ini adalah simulasi pembelian. Belum ada pembayaran atau pendaftaran kelas.');
-      }}>Beli Sekarang</button>
+      <Link className="btn btn-primary" to={`/course/${course.slug}/payment`}>Beli Sekarang</Link>
       <button className="btn detail-outline" type="button" onClick={share}>Bagikan Kelas</button>
       <p className="purchase-feedback" role="status">{message}</p>
       {shareUrl && <label className="share-field">Tautan kelas<input value={shareUrl} readOnly onFocus={(event) => event.target.select()} /></label>}

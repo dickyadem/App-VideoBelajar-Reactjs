@@ -1,6 +1,6 @@
 ﻿# videobelajar — ReactJS
 
-Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Navigasi menggunakan React Router dengan halaman Beranda, Kategori, Detail Kelas, Login, dan Register.
+Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Navigasi menggunakan React Router dengan halaman Beranda, Kategori, Detail Kelas, Metode Pembayaran, Login, dan Register.
 
 ## Teknologi
 
@@ -18,6 +18,7 @@ Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Navigasi menggun
 - Paginasi katalog menampilkan empat kelas per halaman. Jumlah halaman mengikuti hasil pencarian/filter, dengan tombol angka serta panah sebelumnya/berikutnya. Perubahan pencarian, filter, atau urutan mengembalikan tampilan ke halaman pertama.
 - Detail untuk setiap kelas: hero, deskripsi, tutor, accordion kurikulum, contoh ulasan, informasi pembelian, dan tiga rekomendasi kelas terkait.
 - Kartu kelas dapat diklik untuk membuka detail. Tombol Bagikan Kelas menyalin tautan, dengan pilihan salin manual jika clipboard tidak tersedia.
+- Checkout responsif dengan pilihan bank, e-wallet, dan kartu; accordion metode; ringkasan pesanan; serta tahapan Pilih Metode → Bayar → Selesai dalam simulasi lokal.
 - Form Login dan Register dengan validasi HTML native, konfirmasi kata sandi, dan tombol tampil/sembunyikan kata sandi.
 - Login dan registrasi simulasi yang mengarahkan pengguna ke Beranda.
 - Header dengan inisial pengguna, tombol keluar, dan menu navigasi mobile.
@@ -27,7 +28,7 @@ Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Navigasi menggun
 
 Data kelas berasal dari `src/data/courses.js`. Autentikasi dan newsletter masih berupa simulasi frontend tanpa backend; kredensial tidak diverifikasi oleh server dan newsletter tidak mengirim email. Tombol Google SSO, pemulihan kata sandi, dan filter Harga/Durasi belum memiliki fungsi lengkap.
 
-Pembelian pada halaman detail merupakan simulasi tanpa pembayaran atau pendaftaran kelas. Kurikulum, profil tutor, dan ulasan menggunakan konten demo; video, dokumen, ujian, dan sertifikat belum tersedia. Harga detail selalu mengikuti harga katalog.
+Tombol beli pada detail membuka metode pembayaran. Checkout merupakan simulasi tanpa payment gateway, pembayaran, atau pendaftaran kelas. Tidak ada data kartu yang diminta. Biaya admin tetap Rp7.000 adalah contoh untuk demo. Kurikulum, profil tutor, dan ulasan menggunakan konten demo; video, dokumen, ujian, dan sertifikat belum tersedia. Harga detail dan checkout mengikuti harga katalog.
 
 ## Menjalankan secara lokal
 
@@ -47,6 +48,7 @@ Buka alamat yang ditampilkan Vite di terminal. Aplikasi saat ini tidak memerluka
 | `/` | Beranda dan koleksi kelas |
 | `/category` | Katalog, pencarian, dan filter kelas |
 | `/course/:slug` | Detail kelas, misalnya `/course/design-thinking-praktis` |
+| `/course/:slug/payment` | Pilihan metode pembayaran dan simulasi checkout untuk kelas tersebut |
 | `/login` | Form masuk |
 | `/register` | Form pendaftaran |
 
@@ -98,3 +100,11 @@ Semua kelas menggunakan satu template `src/pages/CourseDetailPage.jsx` dengan st
 2. Tambahkan konten dengan key slug yang sama di `src/data/courseDetails.js`: `description`, `tutorBio`, `modules` (judul bagian dan daftar `lessons` berisi `title` serta `minutes`), dan `reviews` (nama, batch, teks).
 3. Kartu kelas otomatis menuju `/course/:slug`. Jumlah video dihitung dari daftar pelajaran dan jumlah dokumen demo mengikuti jumlah modul.
 4. Jalankan `npm test` dan `npm run build` setelah perubahan. Slug yang tidak ditemukan menampilkan tautan kembali ke katalog.
+
+## Mengelola metode pembayaran
+
+- Harga kelas disimpan sebagai angka rupiah (`priceAmount`) di `src/data/courses.js`; label harga katalog dan perhitungan checkout berasal dari nilai tersebut.
+- Kelompok metode, nama penyedia, dan biaya admin demo berada di `src/data/paymentMethods.js`. Pilihan awal adalah BCA; hanya satu metode aktif pada satu waktu.
+- `src/components/PaymentMethods.jsx` menangani pilihan dan accordion. `src/pages/PaymentMethodPage.jsx` menangani ringkasan dan tahapan simulasi, dengan styling di `assets/css/payment-method.css`.
+- Klik **Beli Sekarang** untuk meninjau metode dan total. **Ubah metode** kembali ke pilihan, sedangkan **Simulasikan pembayaran** menampilkan penyelesaian demo. Memuat ulang halaman mengulang simulasi dari awal.
+- Ringkasan kelas berada di kanan pada desktop dan di atas pilihan metode pada mobile; gambar kelas disembunyikan pada mobile. Penanda merek berupa teks/CSS sederhana lokal, tanpa dependensi layanan logo eksternal.

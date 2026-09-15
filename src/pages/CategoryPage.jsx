@@ -1,14 +1,15 @@
-﻿import { useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import CategoryTabs from '../components/CategoryTabs';
 import CourseCard from '../components/CourseCard';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import { courses } from '../data/courses';
+import { courseDetails } from '../data/courseDetails';
 
 const PAGE_SIZE = 4;
 const filters = [
   ['Bidang Studi', ['Pemasaran', 'Digital & Teknologi', 'Pengembangan Diri', 'Bisnis Manajemen']],
-  ['Harga', ['Pemasaran', 'Digital & Teknologi', 'Pengembangan Diri', 'Bisnis Manajemen']],
+  ['Harga', ['Di bawah Rp 200K', 'Rp 200K - 300K', 'Di atas Rp 300K']],
   ['Durasi', ['Kurang dari 4 Jam', '4 - 8 Jam', 'Lebih dari 8 Jam']],
 ];
 const studyCategories = { Pemasaran: 'marketing', 'Digital & Teknologi': 'design', 'Pengembangan Diri': 'personal', 'Bisnis Manajemen': 'business' };
@@ -18,18 +19,27 @@ export default function CategoryPage() {
   const [sort, setSort] = useState('default');
   const [category, setCategory] = useState('all');
   const [selectedStudies, setSelectedStudies] = useState([]);
+  const [selectedPrice, setSelectedPrice] = useState('');
+  const [selectedDuration, setSelectedDuration] = useState('');
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
 
   const visibleCourses = useMemo(() => {
     const filtered = courses.filter((course) => {
       const matchesCategory = category === 'all' || course.category === category;
       const matchesStudy = selectedStudies.length === 0 || selectedStudies.includes(course.category);
+      const matchesPrice = !selectedPrice || (selectedPrice === 'low' && course.priceAmount < 200000) || (selectedPrice === 'mid' && course.priceAmount >= 200000 && course.priceAmount <= 300000) || (selectedPrice === 'high' && course.priceAmount > 300000);
+      const minutes = courseDetails[course.slug].modules.reduce((total, module) => total + module.lessons.reduce((sum, lesson) => sum + lesson.minutes, 0), 0);
+      const matchesDuration = !selectedDuration || (selectedDuration === 'short' && minutes < 240) || (selectedDuration === 'medium' && minutes >= 240 && minutes <= 480) || (selectedDuration === 'long' && minutes > 480);
       const matchesQuery = `${course.title} ${course.description} ${course.instructorName}`.toLowerCase().includes(query.toLowerCase());
-      return matchesCategory && matchesStudy && matchesQuery;
+      return matchesCategory && matchesStudy && matchesPrice && matchesDuration && matchesQuery;
     });
     if (sort === 'price') return [...filtered].sort((first, second) => first.price.localeCompare(second.price));
     return filtered;
-  }, [category, query, selectedStudies, sort]);
+  }, [category, query, selectedStudies, selectedPrice, selectedDuration, sort]);
 
   const pageCount = Math.ceil(visibleCourses.length / PAGE_SIZE);
   const pageCourses = visibleCourses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -38,6 +48,8 @@ export default function CategoryPage() {
     setCategory('all');
     setQuery('');
     setSelectedStudies([]);
+    setSelectedPrice('');
+    setSelectedDuration('');
     setPage(1);
   }
 
@@ -58,9 +70,9 @@ export default function CategoryPage() {
           {filters.map(([title, options]) => <fieldset className="filter-group" key={title}>
             <legend>{title}<span aria-hidden="true">⌃</span></legend>
             {options.map((option) => <label key={option}>
-              <input type={title === 'Durasi' ? 'radio' : 'checkbox'} name={title}
-                checked={title === 'Bidang Studi' ? selectedStudies.includes(studyCategories[option]) : undefined}
-                onChange={title === 'Bidang Studi' ? () => toggleStudy(studyCategories[option]) : undefined} />
+              <input type={title === 'Bidang Studi' ? 'checkbox' : 'radio'} name={title}
+                checked={title === 'Bidang Studi' ? selectedStudies.includes(studyCategories[option]) : title === 'Harga' ? selectedPrice === (option === 'Di bawah Rp 200K' ? 'low' : option === 'Rp 200K - 300K' ? 'mid' : 'high') : selectedDuration === (option === 'Kurang dari 4 Jam' ? 'short' : option === '4 - 8 Jam' ? 'medium' : 'long')}
+                onChange={title === 'Bidang Studi' ? () => toggleStudy(studyCategories[option]) : title === 'Harga' ? () => { setSelectedPrice(option === 'Di bawah Rp 200K' ? 'low' : option === 'Rp 200K - 300K' ? 'mid' : 'high'); setPage(1); } : () => { setSelectedDuration(option === 'Kurang dari 4 Jam' ? 'short' : option === '4 - 8 Jam' ? 'medium' : 'long'); setPage(1); }} />
               <span>{option}</span>
             </label>)}
           </fieldset>)}

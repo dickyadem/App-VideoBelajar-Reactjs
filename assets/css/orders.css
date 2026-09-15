@@ -1,0 +1,59 @@
+.orders-page { display: grid; grid-template-columns: 155px minmax(0, 1fr); gap: 44px; max-width: 1080px; padding-top: 34px; padding-bottom: 56px; }
+.orders-sidebar h1 { margin: 0; font-size: 16px; }
+.orders-sidebar > p { margin: 3px 0 22px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+.orders-sidebar nav { display: grid; gap: 0; padding: 10px 12px; background: white; border: 1px solid var(--line); border-radius: 6px; }
+.orders-nav-item { display: flex; gap: 10px; align-items: center; padding: 10px 7px; color: #b0b0b8; font-size: 12px; }
+.orders-nav-item.is-active { color: var(--accent); background: #fff6df; border: 1px solid #ffbd35; }
+.orders-tabs { display: flex; align-items: end; gap: 26px; min-height: 45px; border-bottom: 1px solid var(--line); }
+.orders-tabs button { padding: 0 0 11px; color: var(--muted); background: none; border: 0; border-bottom: 2px solid transparent; font-size: 12px; cursor: pointer; }
+.orders-tabs button[aria-selected="true"] { color: #ff3d24; border-bottom-color: #ff3d24; }
+.orders-toolbar { display: flex; justify-content: flex-end; gap: 10px; margin: 12px 0; }
+.orders-sort, .orders-search { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; color: var(--muted); border: 1px solid var(--line); border-radius: 7px; font-size: 11px; }
+.orders-sort select, .orders-search input { color: var(--muted); background: transparent; border: 0; outline: 0; font-size: 11px; }
+.orders-search input { width: 84px; }
+.orders-search span { font-size: 18px; }
+.order-list { display: grid; gap: 16px; }
+.order-card { overflow: hidden; background: white; border: 1px solid var(--line); border-radius: 7px; }
+.order-card-meta, .order-card-total { display: flex; align-items: center; gap: 14px; padding: 9px 12px; background: #f6fff4; color: var(--muted); font-size: 10px; }
+.order-card-meta a { color: #168bd3; text-decoration: underline; }
+.order-card-meta time { white-space: nowrap; }
+.order-status { margin-left: auto; padding: 4px 8px; border-radius: 5px; font-size: 9px; }
+.order-status-berhasil { color: #20b957; background: #d9fbdc; }
+.order-status-gagal { color: #ed6b46; background: #ffe1d8; }
+.order-status-belum-bayar { color: #d89c00; background: #fff1c4; }
+.order-card-course { display: grid; grid-template-columns: 34px minmax(0, 1fr) 105px; gap: 12px; align-items: center; padding: 12px; }
+.order-card-course img { width: 34px; height: 28px; object-fit: cover; border-radius: 4px; }
+.order-card-course h3 { margin: 0; font-size: 12px; font-weight: 700; }
+.order-card-course div { display: grid; gap: 2px; padding-left: 18px; border-left: 1px solid var(--line); }
+.order-card-course small, .order-card-total small { color: var(--muted); font-size: 9px; }
+.order-card-course strong { font-size: 11px; }
+.order-card-total { justify-content: space-between; border-top: 1px solid var(--line); }
+.order-card-total strong { color: var(--primary); font-size: 11px; }
+.orders-pagination { display: flex; justify-content: flex-end; gap: 5px; margin-top: 18px; }
+.orders-pagination button { min-width: 24px; height: 24px; color: var(--muted); background: #f7f7fa; border: 0; border-radius: 4px; font-size: 10px; }
+.orders-pagination button[aria-current="page"] { color: white; background: var(--accent); }
+.orders-empty { padding: 32px; color: var(--muted); text-align: center; }
+@media (max-width: 767px) {
+  .orders-page { display: flex; flex-direction: column; gap: 20px; width: calc(100% - 28px); padding-top: 18px; padding-bottom: 28px; }
+  .orders-sidebar h1 { font-size: 18px; }
+  .orders-sidebar > p { font-size: 12px; }
+  .orders-sidebar nav { padding: 10px 14px; }
+  .orders-nav-item { padding: 10px 0; font-size: 13px; }
+  .orders-content { padding: 18px 14px; background: white; border: 1px solid var(--line); border-radius: 8px; }
+  .orders-tabs { overflow-x: auto; justify-content: flex-start; gap: 28px; white-space: nowrap; }
+  .orders-tabs button { flex: 0 0 auto; font-size: 11px; }
+  .orders-toolbar { justify-content: space-between; margin: 14px 0; }
+  .orders-sort, .orders-search { height: 36px; }
+  .orders-search input { width: 82px; }
+  .order-list { gap: 16px; }
+  .order-card-meta { flex-wrap: wrap; gap: 5px 8px; padding: 9px 12px; }
+  .order-card-meta time { font-size: 9px; }
+  .order-status { width: fit-content; margin-left: 0; }
+  .order-card-course { grid-template-columns: 38px minmax(0, 1fr); gap: 12px; padding: 14px 12px; }
+  .order-card-course img { width: 38px; height: 38px; }
+  .order-card-course h3 { font-size: 13px; line-height: 1.35; }
+  .order-card-course div { grid-column: 1 / -1; padding: 8px 0 0; border: 0; }
+  .order-card-course strong { font-size: 14px; }
+  .order-card-total { padding: 9px 12px; }
+  .orders-pagination { justify-content: center; margin-top: 18px; }
+}

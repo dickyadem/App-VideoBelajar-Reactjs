@@ -44,6 +44,18 @@
   .catalog-controls { justify-content:space-between; }
   .catalog .category-list { display:grid; margin-bottom:18px; }
   .category-course-grid { grid-template-columns:1fr; }
-  .category-course-grid .course-image { height:180px; }
+  .category-course-grid .course-card { display:grid; grid-template-columns:64px minmax(0,1fr); grid-template-rows:64px; min-height:114px; padding:10px 10px 32px; align-items:start; }
+  .category-course-grid .course-image { grid-column:1; grid-row:1; width:64px; height:64px; border-radius:6px; }
+  .category-course-grid .course-body { grid-column:2; grid-row:1; min-width:0; padding:0 0 0 10px; }
+  .category-course-grid .course-body h3 { margin:0 0 4px; font-size:13px; line-height:1.15; }
+  .category-course-grid .course-body p { display:none; }
+  .category-course-grid .instructor { gap:6px; margin:0; }
+  .category-course-grid .instructor-avatar { width:24px; height:24px; }
+  .category-course-grid .instructor-name { font-size:10px; }
+  .category-course-grid .instructor-role { font-size:9px; }
+  .category-course-grid .course-footer { position:absolute; right:10px; bottom:10px; left:10px; margin:0; padding:0; }
+  .category-course-grid .rating { gap:4px; font-size:10px; }
+  .category-course-grid .stars { font-size:13px; }
+  .category-course-grid .price { font-size:16px; line-height:1; }
   .pagination { justify-content:center; }
 }

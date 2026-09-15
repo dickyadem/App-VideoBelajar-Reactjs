@@ -45,15 +45,18 @@ test('related courses exclude the current course and navigate to another detail'
   expect(screen.getByRole('heading', { level: 1, name: courses[4].title })).toBeInTheDocument();
 });
 
-test('purchase explains that no payment has been made', () => {
+test('purchase opens the payment method page first', () => {
+  localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky', isLoggedIn: true }));
   open(`/course/${slugs[0]}`);
-  fireEvent.click(screen.getByRole('button', { name: 'Beli Sekarang' }));
-  expect(screen.getByRole('status')).toHaveTextContent('Belum ada pembayaran atau pendaftaran kelas');
+  fireEvent.click(screen.getByRole('link', { name: 'Beli Sekarang' }));
+  expect(screen.getByRole('heading', { name: 'Metode Pembayaran' })).toBeInTheDocument();
 });
 
-test('starts the next course at the top and clears previous purchase feedback', () => {
+test('starts the next course at the top and clears previous share feedback', async () => {
   open(`/course/${slugs[0]}`);
-  fireEvent.click(screen.getByRole('button', { name: 'Beli Sekarang' }));
+  vi.stubGlobal('navigator', { clipboard: { writeText: vi.fn().mockResolvedValue(undefined) } });
+  fireEvent.click(screen.getByRole('button', { name: 'Bagikan Kelas' }));
+  await screen.findByText('Tautan kelas berhasil disalin.');
   const related = screen.getByRole('region', { name: 'Video Pembelajaran Terkait Lainnya' });
   window.scrollTo.mockClear();
   fireEvent.click(within(related).getByRole('link', { name: courses[4].title }));
