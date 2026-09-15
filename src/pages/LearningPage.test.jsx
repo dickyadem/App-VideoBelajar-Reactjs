@@ -11,6 +11,42 @@ function open(path = '/learn/big-4-auditor-financial-analyst') {
   render(<MemoryRouter initialEntries={[path]}><AuthProvider><App /></AuthProvider></MemoryRouter>);
 }
 
+test('completed lessons show a check after next and after reopening the page', () => {
+  open();
+  const sidebar = within(screen.getByRole('complementary', { name: 'Daftar modul' }));
+  const lesson = sidebar.getByRole('button', { name: /Memahami neraca dan laba rugi/ });
+  fireEvent.click(lesson);
+  expect(within(lesson).queryByRole('img', { name: 'Selesai' })).not.toBeInTheDocument();
+  fireEvent.click(within(screen.getByRole('contentinfo')).getAllByRole('button')[1]);
+  expect(within(lesson).getByRole('img', { name: 'Selesai' })).toBeInTheDocument();
+  const nextLesson = sidebar.getByRole('button', { name: /Membaca laporan arus kas/ });
+  expect(nextLesson).toHaveClass('is-selected');
+  expect(within(nextLesson).queryByRole('img', { name: 'Selesai' })).not.toBeInTheDocument();
+  cleanup();
+  open();
+  expect(within(screen.getByRole('complementary', { name: 'Daftar modul' })).getByRole('img', { name: 'Selesai' })).toBeInTheDocument();
+});
+
+test('opens summary before quiz and provides a course-specific download', () => {
+  open();
+  const sidebar = within(screen.getByRole('complementary', { name: 'Daftar modul' }));
+  fireEvent.click(sidebar.getByRole('button', { name: /Rangkuman:/ }));
+  expect(screen.getByRole('heading', { name: 'Download Rangkuman Modul' })).toBeInTheDocument();
+  const download = screen.getByRole('link', { name: /Download Rangkuman/ });
+  expect(download).toHaveAttribute('download', 'rangkuman-big-4-auditor-financial-analyst.txt');
+  const content = decodeURIComponent(download.getAttribute('href').split(',')[1]);
+  expect(content).toContain('Big 4 Auditor Financial Analyst');
+  expect(content).toContain('Dasar Laporan Keuangan');
+  expect(content).toContain('Membaca laporan arus kas');
+  const [previous, next] = within(screen.getByRole('contentinfo')).getAllByRole('button');
+  expect(previous).toHaveTextContent('Presentasi analisis perusahaan');
+  expect(next).toHaveTextContent('Quiz:');
+  fireEvent.click(next);
+  expect(screen.getByRole('button', { name: 'Mulai Quiz' })).toBeInTheDocument();
+  fireEvent.click(previous);
+  expect(screen.getByRole('heading', { name: 'Download Rangkuman Modul' })).toBeInTheDocument();
+});
+
 test('opens purchased course at the first item, Pre-Test', () => {
   open();
   expect(screen.getByRole('heading', { name: 'Aturan' })).toBeInTheDocument();
@@ -20,7 +56,7 @@ test('opens purchased course at the first item, Pre-Test', () => {
   expect(previous).toBeDisabled();
   expect(next).toHaveTextContent('Memahami neraca dan laba rugi');
   expect(screen.getByRole('complementary', { name: 'Daftar modul' })).toBeInTheDocument();
-  expect(screen.getByText('25% Modul Telah Selesai')).toBeInTheDocument();
+  expect(screen.getByText('0% Modul Telah Selesai')).toBeInTheDocument();
 });
 
 test('selects another lesson from the module list', () => {

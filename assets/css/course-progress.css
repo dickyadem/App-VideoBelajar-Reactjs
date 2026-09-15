@@ -1,0 +1,11 @@
+.course-progress { position: relative; margin-left: auto; flex-shrink: 0; }
+.course-progress-count { display: flex; align-items: center; gap: 16px; color: #35ce42; font-size: 14px; }
+.course-progress progress { width: 145px; height: 10px; border: 0; border-radius: 10px; overflow: hidden; background: #fff7dc; accent-color: #ffbd35; }
+.course-progress progress::-webkit-progress-bar { background: #fff7dc; }.course-progress progress::-webkit-progress-value { background: #ffbd35; border-radius: 10px; }.course-progress progress::-moz-progress-bar { background: #ffbd35; }
+.certificate-toggle { display: flex; align-items: center; gap: 12px; padding: 11px 20px; border: 1px solid #35ce42; border-radius: 10px; color: #29bd39; background: white; font: inherit; font-weight: 600; cursor: pointer; }
+.certificate-popover { position: absolute; right: 0; top: calc(100% + 20px); z-index: 40; width: min(400px, calc(100vw - 32px)); padding: 24px; box-sizing: border-box; border-radius: 10px; background: white; box-shadow: 0 8px 32px #0002; text-align: left; }
+.certificate-popover::before { content: ''; position: absolute; right: 20px; top: -10px; border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 12px solid white; }
+.certificate-popover h2 { margin: 0 0 12px; padding-bottom: 12px; border-bottom: 1px solid #eee; font-size: 18px; }.certificate-popover p { margin: 0 0 14px; color: #777; font-size: 15px; line-height: 1.5; }
+.certificate-popover a { display: block; padding: 10px; border-radius: 10px; color: white; background: #35ce42; text-align: center; text-decoration: none; font-weight: 700; }
+@media (max-width: 600px) { .course-progress progress { width: 60px; }.certificate-toggle { padding: 8px; gap: 4px; font-size: 12px; }.certificate-popover { position: fixed; top: 76px; right: 16px; } }
+.module-completed-icon { display: inline-flex !important; align-items: center; justify-content: center; flex: 0 0 20px; width: 20px; height: 20px; border-radius: 50%; color: white !important; background: #35ce42; font-size: 14px; font-weight: 700; line-height: 1; }

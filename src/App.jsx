@@ -13,6 +13,7 @@ import ClassesPage from './pages/ClassesPage';
 import ProfilePage from './pages/ProfilePage';
 import LearningPage from './pages/LearningPage';
 import QuizPage from './pages/QuizPage';
+import CertificatePage from './pages/CertificatePage';
 
 function ProfileLinkRedirect() {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ export default function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/category" element={<CategoryPage />} />
       <Route path="/course/:slug" element={<CourseDetailPage />} />
+      <Route path="/course/:slug/certificate" element={<RequireAuth><CertificatePage /></RequireAuth>} />
       <Route path="/course/:slug/payment" element={<RequireAuth><PaymentMethodPage /></RequireAuth>} />
       <Route path="/course/:slug/pay" element={<RequireAuth><PaymentPage /></RequireAuth>} />
       <Route path="/orders" element={<RequireAuth><OrdersPage /></RequireAuth>} />
