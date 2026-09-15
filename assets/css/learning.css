@@ -10,3 +10,4 @@
 .learning-summary-download:hover { background: #effbed; }
 .learning-summary-download:focus-visible { outline: 2px solid #16843d; outline-offset: 3px; }
 .learning-rules-image { display: block; width: 100%; height: auto; }
+.learning-header > .learning-avatar { flex-shrink: 0; overflow: hidden; color: var(--primary-dark); background: #d1fae5; font-size: 12px; text-decoration: none; }

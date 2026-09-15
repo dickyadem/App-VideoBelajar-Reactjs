@@ -19,6 +19,28 @@
     box-sizing: border-box;
 }
 
+/* Shared full-height layout, including pages rendered as React fragments. */
+#root:has(> .site-footer),
+#root > div:has(> .site-footer) {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+#root > .site-footer,
+#root > div > .site-footer {
+    margin-top: auto;
+    flex-shrink: 0;
+}
+
+#root:has(> .site-footer) > header,
+#root:has(> .site-footer) > main,
+#root > div:has(> .site-footer) > header,
+#root > div:has(> .site-footer) > main {
+    flex-shrink: 0;
+}
+
 html {
     scroll-behavior: smooth;
 }
