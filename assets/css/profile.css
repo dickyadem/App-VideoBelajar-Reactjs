@@ -18,3 +18,7 @@
 .profile-actions { display: flex; align-items: center; justify-content: flex-end; gap: 16px; margin-top: 18px; }.profile-actions p { margin: 0; color: var(--primary-dark); font-size: 12px; }
 .profile-actions .btn { min-height: 40px; padding: 8px 24px; }
 @media (max-width: 767px) { .profile-page { display: flex; flex-direction: column; gap: 20px; width: calc(100% - 28px); padding-top: 20px; padding-bottom: 28px; }.profile-sidebar h1 { font-size: 18px; }.profile-sidebar nav { padding: 10px 14px; }.profile-nav-item { font-size: 13px; }.profile-card { padding: 18px; }.profile-heading h2 { font-size: 18px; }.profile-heading p { font-size: 13px; }.profile-fields { grid-template-columns: 1fr; }.profile-actions { justify-content: stretch; align-items: stretch; flex-direction: column; gap: 8px; }.profile-actions .btn { width: 100%; } }
+.profile-layout { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+.profile-layout > main { flex: 1; align-content: start; align-items: start; }
+.profile-layout > header, .profile-layout > footer { flex-shrink: 0; }
+@media (max-width: 767px) { .profile-layout > main { align-items: stretch; } }
