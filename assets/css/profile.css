@@ -22,3 +22,6 @@
 .profile-layout > main { flex: 1; align-content: start; align-items: start; }
 .profile-layout > header, .profile-layout > footer { flex-shrink: 0; }
 @media (max-width: 767px) { .profile-layout > main { align-items: stretch; } }
+.profile-avatar { flex-shrink: 0; overflow: hidden; }
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-photo-hint { display: block; margin-top: 6px; color: var(--muted); font-size: 12px; }
