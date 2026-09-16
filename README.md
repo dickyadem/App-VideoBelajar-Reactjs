@@ -35,7 +35,7 @@ Array object pesanan disimpan pada `user.orders` dalam state `AuthContext` (`use
 - Kartu kelas dapat diklik untuk membuka detail. Tombol Bagikan Kelas menyalin tautan, dengan pilihan salin manual jika clipboard tidak tersedia.
 - Checkout responsif dengan pilihan bank, e-wallet, dan kartu; accordion metode; ringkasan pesanan; serta tahapan Pilih Metode → Bayar → Selesai dalam simulasi lokal.
 - Form Login dan Register dengan validasi HTML native, konfirmasi kata sandi, dan tombol tampil/sembunyikan kata sandi.
-- Login dan registrasi simulasi yang mengarahkan pengguna ke Beranda.
+- Login simulasi mengarahkan pengguna ke Beranda. Registrasi menampilkan pesan berhasil pada halaman Login tanpa otomatis masuk.
 - Header dengan inisial pengguna, tombol keluar, dan menu navigasi mobile.
 - Status login bertahan setelah halaman dimuat ulang melalui `localStorage`.
 - Halaman profil, pesanan, dan kelas saya.
