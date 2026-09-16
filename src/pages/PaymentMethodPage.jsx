@@ -1,3 +1,4 @@
+import { useOrders } from '../context/useOrders';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
@@ -13,6 +14,17 @@ function Checkout({ course, detail }) {
   const content = useRef(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { orders, createOrder, updateOrder } = useOrders();
+  const [error, setError] = useState('');
+  const submitOrder = () => {
+    try {
+      const existing = orders.find((item) => item.id === searchParams.get('order') && item.slug === course.slug);
+      let id;
+      if (searchParams.has('order')) { if (!existing) throw new Error('Pesanan tidak ditemukan.'); updateOrder(existing.id, { method: selectedPayment }); id = existing.id; }
+      else id = createOrder(course, selectedPayment);
+      navigate('/course/' + course.slug + '/pay?order=' + id + '&method=' + selectedPayment);
+    } catch { setError('Pesanan belum tersimpan. Periksa pesanan atau penyimpanan browser.'); }
+  };
   const isChangingMethod = searchParams.get('change') === '1';
   const total = course.priceAmount + ADMIN_FEE;
   const videoCount = detail.modules.reduce((count, module) => count + module.lessons.length, 0);
@@ -57,8 +69,8 @@ function Checkout({ course, detail }) {
         </section>
         <section className="checkout-panel change-method-card" aria-labelledby="payment-method-title">
           <h1 id="payment-method-title">{isChangingMethod ? 'Ubah Metode Pembayaran' : 'Metode Pembayaran'}</h1>
-          <PaymentMethods selectedPayment={selectedPayment} onChange={setSelectedPayment} />
-          <button className="btn btn-primary checkout-action" type="button" disabled={!selectedPayment} onClick={() => navigate(isChangingMethod ? `/course/${course.slug}/pay?method=${selectedPayment}&status=success` : `/course/${course.slug}/pay?method=${selectedPayment}`)}>{isChangingMethod ? 'Bayar Sekarang' : 'Beli Sekarang'}</button>
+          <p role="alert">{error}</p><PaymentMethods selectedPayment={selectedPayment} onChange={setSelectedPayment} />
+          <button className="btn btn-primary checkout-action" type="button" disabled={!selectedPayment} onClick={submitOrder}>{isChangingMethod ? 'Bayar Sekarang' : 'Beli Sekarang'}</button>
         </section>
       </section>
 

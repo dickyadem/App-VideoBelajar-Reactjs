@@ -3,8 +3,13 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, expect, test } from 'vitest';
 import App from '../App';
 import { AuthProvider } from '../context/AuthContext';
+import { courses } from '../data/courses';
+import { courseDetails } from '../data/courseDetails';
 
-beforeEach(() => localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky', isLoggedIn: true })));
+beforeEach(() => {
+  localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky', isLoggedIn: true, orders: courses.slice(0, 3).map((course) => ({ slug: course.slug, status: 'Berhasil' })) }));
+  localStorage.setItem(`videobelajar-progress:Dicky:${courses[0].slug}`, JSON.stringify(['pretest', 'summary', 'quiz', 'exam', ...courseDetails[courses[0].slug].modules.flatMap((module) => module.lessons.map((lesson) => lesson.title))]));
+});
 afterEach(() => { cleanup(); localStorage.clear(); });
 
 function open(path = '/classes') {
@@ -26,7 +31,7 @@ test('filters running and completed classes', () => {
   expect(screen.getAllByRole('article', { name: /Kelas/ })).toHaveLength(2);
   fireEvent.click(screen.getByRole('tab', { name: 'Selesai' }));
   expect(screen.getAllByRole('article', { name: /Kelas/ })).toHaveLength(1);
-  expect(screen.getByRole('button', { name: 'Unduh Sertifikat' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Unduh Sertifikat' })).toHaveAttribute('href', `/course/${courses[0].slug}/certificate`);
 });
 
 test('class actions open the video learning page', () => {
@@ -46,4 +51,26 @@ test('redirects a guest to login', () => {
   localStorage.clear();
   open();
   expect(screen.getByRole('heading', { name: 'Masuk ke Akun' })).toBeInTheDocument();
+});
+
+test('only includes successful purchases without duplicate classes', () => {
+  localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky', isLoggedIn: true, orders: [
+    { slug: courses[1].slug, status: 'Berhasil' },
+    { slug: courses[1].slug, status: 'Berhasil' },
+    { slug: courses[2].slug, status: 'Belum Bayar' },
+    { slug: courses[0].slug, status: 'Gagal' },
+  ] }));
+  localStorage.setItem(`videobelajar-progress:Dicky:${courses[1].slug}`, JSON.stringify(['pretest']));
+  open();
+  expect(screen.getAllByRole('article')).toHaveLength(1);
+  expect(screen.getByRole('article')).toHaveTextContent('1 / 11 Modul Terselesaikan');
+  expect(screen.getByRole('article')).toHaveTextContent('9%');
+  expect(screen.queryByRole('link', { name: 'Unduh Sertifikat' })).not.toBeInTheDocument();
+});
+
+test('shows an empty state before the first purchase', () => {
+  localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky', isLoggedIn: true }));
+  open();
+  expect(screen.getByText('Belum ada kelas yang dibeli')).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Jelajahi Kelas' })).toHaveAttribute('href', '/category');
 });

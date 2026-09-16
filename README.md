@@ -15,6 +15,19 @@ Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Mencakup katalog
 
 ## Fitur
 
+### CRUD pesanan
+
+- **Create:** pilih metode lalu klik **Beli Sekarang** untuk menambahkan pesanan berstatus **Belum Bayar**. Checkout ulang kelas yang sama menggunakan pesanan belum dibayar yang sudah ada.
+- **Read:** halaman Pesanan menampilkan judul kelas, invoice, tanggal, metode, harga dan total termasuk biaya admin. Pencarian, filter, dan pengurutan memakai data pesanan pengguna.
+- **Update:** **Ubah Metode** memperbarui pesanan yang sama; **Bayar Sekarang** pada halaman pembayaran mengubah status menjadi **Berhasil** (simulasi).
+- **Delete:** pesanan belum dibayar dapat dihapus melalui **Hapus Pesanan → Ya, Hapus**. **Batal** mempertahankan pesanan.
+
+Array object pesanan disimpan pada `user.orders` dalam state `AuthContext` (`useState`) dan `localStorage` melalui `src/context/useOrders.js`. Data bertahan setelah refresh dan perubahan profil. Logout menghapus sesi lokal beserta pesanan; belum ada database atau riwayat akun lintas login. URL hasil pembayaran demo tanpa ID pesanan tidak menjadi bukti transaksi tersimpan.
+
+### Fitur lainnya
+
+- **Kelas Saya** menampilkan kelas dari pesanan berstatus Berhasil, tanpa duplikasi. Persentase dan status selesai mengikuti progres belajar lokal; jumlah modul serta durasi video dihitung dari kurikulum. Kelas selesai menyediakan tautan ke halaman sertifikat.
+
 - Beranda responsif dengan hero, koleksi kelas, filter kategori, newsletter, dan footer.
 - Katalog dengan pencarian berdasarkan judul, deskripsi, atau nama instruktur; filter kategori dan bidang studi; serta pilihan pengurutan harga.
 - Paginasi katalog menampilkan empat kelas per halaman. Jumlah halaman mengikuti hasil pencarian/filter, dengan tombol angka serta panah sebelumnya/berikutnya. Perubahan pencarian, filter, atau urutan mengembalikan tampilan ke halaman pertama.

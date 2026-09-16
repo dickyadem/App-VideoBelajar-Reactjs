@@ -57,3 +57,7 @@
   .order-card-total { padding: 9px 12px; }
   .orders-pagination { justify-content: center; margin-top: 18px; }
 }
+.order-crud-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px; }
+.order-crud-actions a, .order-crud-actions button, .order-delete-confirm button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; background: white; font: inherit; }
+.order-crud-actions button { color: #c22; }
+.order-delete-confirm { padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: white; }

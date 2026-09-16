@@ -1,3 +1,4 @@
+import { useOrders } from '../context/useOrders';
 import paymentSuccessImage from '../../assets/images/information-image/pembayaranSukses.webp';
 import paymentPendingImage from '../../assets/images/information-image/pembayaranTertunda.webp';
 import { useEffect, useState } from 'react';
@@ -53,13 +54,29 @@ function PaymentResult({ course, status }) {
 
 function PaymentPageContent({ course, detail, method, initialStatus = '' }) {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const { orders, createOrder, updateOrder } = useOrders();
+  const order = orders.find((item) => item.id === params.get('order') && item.slug === course.slug);
+  const [error, setError] = useState('');
+  const pay = () => {
+    try {
+      if (!order) {
+        if (params.has('order')) throw new Error('Pesanan tidak ditemukan.');
+        const id = createOrder(course, method.id, 'Berhasil');
+        navigate('/course/' + course.slug + '/pay?order=' + id + '&method=' + method.id);
+        return;
+      }
+      updateOrder(order.id, { status: 'Berhasil' });
+      setResultStatus('success');
+    } catch { setError('Pembayaran belum diproses. Periksa pesanan atau penyimpanan browser.'); }
+  };
   const [resultStatus, setResultStatus] = useState(initialStatus);
-  const complete = Boolean(resultStatus);
+  const complete = order?.status === 'Berhasil' || Boolean(resultStatus);
   const [copied, setCopied] = useState(false);
   const total = course.priceAmount + ADMIN_FEE;
   const virtualAccount = '11739081234567890';
   const copyAccount = async () => { try { await navigator.clipboard.writeText(virtualAccount); } catch {} setCopied(true); };
-  return <div className="payment-page"><header className="payment-header"><Link className="logo" to="/" aria-label="videobelajar Beranda"><img src={`${import.meta.env.BASE_URL}assets/images/logo.png`} alt="videobelajar" /></Link><div className="payment-header-mobile"><Header /></div><div className="payment-stepper-desktop"><Stepper complete={complete} /></div></header>{!complete && <Countdown />}<div className="payment-stepper-mobile"><Stepper complete={complete} /></div><main className="payment-container container">{complete ? <PaymentResult course={course} status={resultStatus} /> : <div className="payment-layout"><section><div className="payment-main-card"><h1 className="payment-title">Pembayaran</h1><div className="virtual-account-box"><div className="payment-provider-logos">{(method.brands || [method.id]).map((brand) => <img key={brand} src={paymentLogos[brand.toLowerCase()]} alt={method.brands ? brand : method.name} />)}</div><p className="payment-method-label">Bayar Melalui Virtual Account <strong>{method.name}</strong></p><div className="virtual-account-number"><span>{virtualAccount}</span><button className="copy-button" type="button" onClick={copyAccount}>{copied ? 'Tersalin' : 'Salin'}</button></div></div><section className="order-summary" aria-labelledby="order-title"><h2 id="order-title">Ringkasan Pesanan</h2><div className="order-row"><span className="order-label">Video Learning: {course.title}</span><span className="order-price">{formatRupiah(course.priceAmount)}</span></div><div className="order-row"><span className="order-label">Biaya Admin</span><span className="order-price">{formatRupiah(ADMIN_FEE)}</span></div><div className="order-total"><span>Total Pembayaran</span><strong className="total-value">{formatRupiah(total)}</strong></div></section><div className="payment-actions"><button className="btn-change-payment" type="button" onClick={() => navigate(`/course/${course.slug}/payment?change=1`)}>Ganti Metode Pembayaran</button><button className="btn-pay-now" type="button" onClick={() => setResultStatus('success')}>Bayar Sekarang</button></div><p className="payment-demo">Mode demo - belum ada transaksi atau akses materi.</p></div><Instructions /></section><CourseSummary course={course} detail={detail} /></div>}</main><Footer /></div>;
+  return <div className="payment-page"><header className="payment-header"><Link className="logo" to="/" aria-label="videobelajar Beranda"><img src={`${import.meta.env.BASE_URL}assets/images/logo.png`} alt="videobelajar" /></Link><div className="payment-header-mobile"><Header /></div><div className="payment-stepper-desktop"><Stepper complete={complete} /></div></header>{!complete && <Countdown />}<div className="payment-stepper-mobile"><Stepper complete={complete} /></div><main className="payment-container container">{complete ? <PaymentResult course={course} status={order?.status === 'Berhasil' ? 'success' : resultStatus} /> : <div className="payment-layout"><section><div className="payment-main-card"><h1 className="payment-title">Pembayaran</h1><div className="virtual-account-box"><div className="payment-provider-logos">{(method.brands || [method.id]).map((brand) => <img key={brand} src={paymentLogos[brand.toLowerCase()]} alt={method.brands ? brand : method.name} />)}</div><p className="payment-method-label">Bayar Melalui Virtual Account <strong>{method.name}</strong></p><div className="virtual-account-number"><span>{virtualAccount}</span><button className="copy-button" type="button" onClick={copyAccount}>{copied ? 'Tersalin' : 'Salin'}</button></div></div><section className="order-summary" aria-labelledby="order-title"><h2 id="order-title">Ringkasan Pesanan</h2><div className="order-row"><span className="order-label">Video Learning: {course.title}</span><span className="order-price">{formatRupiah(course.priceAmount)}</span></div><div className="order-row"><span className="order-label">Biaya Admin</span><span className="order-price">{formatRupiah(ADMIN_FEE)}</span></div><div className="order-total"><span>Total Pembayaran</span><strong className="total-value">{formatRupiah(total)}</strong></div></section><p role="alert">{error}</p><div className="payment-actions"><button className="btn-change-payment" type="button" onClick={() => navigate(`/course/${course.slug}/payment?change=1${order ? '&order=' + order.id : ''}`)}>Ganti Metode Pembayaran</button><button className="btn-pay-now" type="button" onClick={pay}>Bayar Sekarang</button></div><p className="payment-demo">Mode demo - belum ada transaksi atau akses materi.</p></div><Instructions /></section><CourseSummary course={course} detail={detail} /></div>}</main><Footer /></div>;
 }
 
 export default function PaymentPage() {

@@ -69,13 +69,13 @@ test('opens payment details after selecting the initial method', () => {
   expect(screen.getByRole('heading', { name: 'Pembayaran' })).toBeInTheDocument();
 });
 
-test('finishes directly after changing the payment method', () => {
+test('returns to payment after changing the payment method', () => {
   open('/course/design-thinking-praktis/payment?change=1');
   fireEvent.click(screen.getByRole('button', { name: 'E-Wallet' }));
   fireEvent.click(screen.getByRole('radio', { name: 'Dana' }));
   fireEvent.click(screen.getByRole('button', { name: 'Bayar Sekarang' }));
-  expect(screen.getByRole('heading', { name: 'Pembayaran Berhasil!' })).toBeInTheDocument();
-  expect(screen.queryByRole('heading', { name: 'Pembayaran' })).not.toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Pembayaran' })).toBeInTheDocument();
+  expect(screen.queryByRole('heading', { name: 'Pembayaran Berhasil!' })).not.toBeInTheDocument();
 });
 
 test('shows the change method page as an actual payment step', () => {
