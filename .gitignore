@@ -40,5 +40,8 @@ test-output.txt
 # Screenshot bukti guideline
 /ss/
 
+# Panduan lokal advanced project
+GUIDELINE_ADVANCE.md
+
 # Dokumentasi API lokal
 API.md
