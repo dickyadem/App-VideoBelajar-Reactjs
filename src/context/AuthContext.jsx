@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { saveProfile } from '../services/profileService';
+import { getProfile, saveProfile } from '../services/profileService';
 import { createAccount, loginAccount, logoutAccount, subscribeToAuth, updateAccountProfile } from '../services/authService';
 import { auth } from '../firebase';
 
@@ -9,11 +9,17 @@ const profileFromFirebaseUser = (firebaseUser) => firebaseUser && ({ uid: fireba
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [syncStatus, setSyncStatus] = useState('');
   const [syncError, setSyncError] = useState('');
   const [storageError, setStorageError] = useState('');
   const [syncAttempt, setSyncAttempt] = useState(0);
-  useEffect(() => subscribeToAuth((firebaseUser) => setUser(profileFromFirebaseUser(firebaseUser))), []);
+  useEffect(() => subscribeToAuth((firebaseUser) => {
+    if (!firebaseUser) { setUser(null); setAuthLoading(false); return; }
+    getProfile(firebaseUser.uid).then((profile) => setUser({ ...profileFromFirebaseUser(firebaseUser), ...profile, uid: firebaseUser.uid, isLoggedIn: true }))
+      .catch(() => setUser(profileFromFirebaseUser(firebaseUser)))
+      .finally(() => setAuthLoading(false));
+  }), []);
   useEffect(() => {
     try {
       if (user) localStorage.setItem(key, JSON.stringify(user));
@@ -45,6 +51,6 @@ export function AuthProvider({ children }) {
     setUser((current) => current && { ...current, ...updates });
   };
   const logout = () => logoutAccount();
-  return <AuthContext.Provider value={{ user, login, register, updateUser, logout, syncStatus, syncError, storageError, retrySync: () => setSyncAttempt((value) => value + 1) }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, authLoading, login, register, updateUser, logout, syncStatus, syncError, storageError, retrySync: () => setSyncAttempt((value) => value + 1) }}>{children}</AuthContext.Provider>;
 }
 export const useAuth = () => useContext(AuthContext);

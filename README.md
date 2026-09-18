@@ -58,7 +58,7 @@ Tombol beli pada detail membuka metode pembayaran. Checkout merupakan simulasi t
 
 Kurikulum, profil tutor, ulasan, dan soal ujian menggunakan konten demo. Pemutar video belum memutar materi asli; progres video dicatat ketika berpindah lewat tombol next di bawah. Rangkuman merupakan deskripsi dan daftar materi, bukan transkrip video. Sertifikat SVG dibuat lokal dan belum diverifikasi atau diterbitkan oleh server.
 
-Progres dan review masih memakai `localStorage`, sehingga tidak tersinkron antarperangkat/browser. Identitas penyimpanan progres dan review memakai nama akun serta slug kelas; perubahan nama akun dapat membuat data lama tidak terbaca, dan akun dengan nama sama berbagi data lokal. Proteksi route dan kelulusan di frontend bukan pengamanan backend.
+Progres belajar disimpan ke Firestore berdasarkan UID Firebase dan slug kelas, sehingga dapat dipulihkan lintas perangkat. `localStorage` hanya fallback/cache browser; review masih lokal dan belum tersinkron antarperangkat. Proteksi route dan kelulusan di frontend bukan pengamanan backend.
 
 ## Menjalankan secara lokal
 
