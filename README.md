@@ -2,6 +2,8 @@
 
 **Live demo:** [Buka VideoBelajar](https://dickyadem.github.io/App-VideoBelajar-Reactjs/)
 
+**Deployment Vercel:** [Open Vercel App](https://app-video-belajar-reactjs-1bax6i5hp-dickyadems-projects.vercel.app/)
+
 Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Mencakup katalog kelas, simulasi pembayaran, profil, kelas saya, pembelajaran, penilaian, review, dan sertifikat. Navigasi menggunakan React Router.
 
 ## Teknologi
