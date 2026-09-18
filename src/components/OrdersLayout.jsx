@@ -2,15 +2,13 @@ import { Outlet } from 'react-router-dom';
 import { OrdersProvider, useOrders } from '../context/OrdersContext';
 import Header from './Header';
 import Footer from './Footer';
+import AsyncContent from './AsyncContent';
 
 function OrdersContent() {
-  const { loading, error, reload } = useOrders();
+  const { loading, loadError: error, reload } = useOrders();
   if (!loading && !error) return <Outlet />;
   return <><Header /><main className="container section">
-    {loading ? <p role="status">Memuat pesanan...</p> : <>
-      <p role="alert">{error}</p>
-      <button className="btn btn-primary" type="button" onClick={reload}>Coba lagi</button>
-    </>}
+    <AsyncContent loading={loading} error={error} loadingMessage="Memuat pesanan..." onRetry={reload} />
   </main><Footer /></>;
 }
 

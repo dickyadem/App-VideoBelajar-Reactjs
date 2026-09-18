@@ -1,29 +1,14 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext } from 'react';
 import { getCatalog } from '../services/catalogService';
+import { useAsyncResource } from '../hooks/useAsyncResource';
 
 export const CatalogContext = createContext(null);
 const emptyCatalog = { courses: [], courseDetails: {}, categories: [], paymentGroups: [] };
 
 export function CatalogProvider({ children }) {
-  const [attempt, setAttempt] = useState(0);
-  const [state, setState] = useState({ data: emptyCatalog, loading: true, error: '' });
+  const state = useAsyncResource(getCatalog, emptyCatalog, 'Gagal memuat data kelas. Silakan coba lagi.');
 
-  useEffect(() => {
-    let active = true;
-    async function load() {
-      setState({ data: emptyCatalog, loading: true, error: '' });
-      try {
-        const data = await getCatalog();
-        if (active) setState({ data, loading: false, error: '' });
-      } catch {
-        if (active) setState({ data: emptyCatalog, loading: false, error: 'Gagal memuat data kelas. Silakan coba lagi.' });
-      }
-    }
-    load();
-    return () => { active = false; };
-  }, [attempt]);
-
-  return <CatalogContext.Provider value={{ ...state.data, loading: state.loading, error: state.error, reload: () => setAttempt((value) => value + 1) }}>{children}</CatalogContext.Provider>;
+  return <CatalogContext.Provider value={{ ...state.data, loading: state.loading, error: state.error, reload: state.reload }}>{children}</CatalogContext.Provider>;
 }
 
 export function useCatalog() {

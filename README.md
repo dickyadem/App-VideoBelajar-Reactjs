@@ -12,7 +12,8 @@ Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Mencakup katalog
 - React Router DOM 7 untuk navigasi halaman.
 - Vite 8 dan plugin React untuk development server dan build.
 - CSS untuk styling dan layout responsif.
-- Context API dan `localStorage` untuk status login simulasi.
+- Firebase Authentication untuk login/register dan UID yang konsisten lintas device; Context API mengelola state user, sementara `localStorage` hanya cache profil browser.
+- Axios untuk contoh konsumsi API CRUD melalui `src/services/api/`; Firebase SDK tetap digunakan sebagai sumber data utama aplikasi.
 - Vitest, React Testing Library, jest-dom, dan jsdom untuk pengujian.
 
 ## Fitur
@@ -24,7 +25,7 @@ Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Mencakup katalog
 - **Update:** **Ubah Metode** memperbarui pesanan yang sama; **Bayar Sekarang** pada halaman pembayaran mengubah status menjadi **Berhasil** (simulasi).
 - **Delete:** pesanan belum dibayar dapat dihapus melalui **Hapus Pesanan → Ya, Hapus**. **Batal** mempertahankan pesanan.
 
-Array object pesanan disimpan pada `user.orders` dalam state `AuthContext` (`useState`) dan `localStorage` melalui `src/context/useOrders.js`. Data bertahan setelah refresh dan perubahan profil. Logout menghapus sesi lokal beserta pesanan; belum ada database atau riwayat akun lintas login. URL hasil pembayaran demo tanpa ID pesanan tidak menjadi bukti transaksi tersimpan.
+Pesanan disimpan di koleksi `orders` Firestore melalui `orderService` dan `OrdersContext`. UI menunggu konfirmasi server sebelum menampilkan sukses. Gagal menulis mempertahankan form atau konfirmasi hapus agar bisa dicoba kembali; gagal membaca menampilkan tombol muat ulang. Identitas demo tetap sama lintas logout/login pada browser ini, tetapi bukan autentikasi lintas perangkat.
 
 ### Fitur lainnya
 
@@ -51,17 +52,17 @@ Array object pesanan disimpan pada `user.orders` dalam state `AuthContext` (`use
 
 ### Batasan saat ini
 
-Data kelas berasal dari `src/data/courses.js`. Autentikasi dan newsletter masih berupa simulasi frontend tanpa backend; kredensial tidak diverifikasi oleh server dan newsletter tidak mengirim email. Tombol Google SSO, pemulihan kata sandi, dan filter Harga/Durasi belum memiliki fungsi lengkap.
+Katalog kelas berasal dari Firestore melalui `catalogService`; `src/data/` dipakai sebagai fixture/seed dan data demo pendukung. Autentikasi email/password menggunakan Firebase Authentication; newsletter masih berupa simulasi frontend tanpa backend dan tidak mengirim email. Tombol Google SSO, pemulihan kata sandi, dan filter Harga/Durasi belum memiliki fungsi lengkap.
 
 Tombol beli pada detail membuka metode pembayaran. Checkout merupakan simulasi tanpa payment gateway, pembayaran, atau pendaftaran kelas. Tidak ada data kartu yang diminta. Biaya admin tetap Rp7.000 adalah contoh untuk demo. Harga detail dan checkout mengikuti harga katalog.
 
 Kurikulum, profil tutor, ulasan, dan soal ujian menggunakan konten demo. Pemutar video belum memutar materi asli; progres video dicatat ketika berpindah lewat tombol next di bawah. Rangkuman merupakan deskripsi dan daftar materi, bukan transkrip video. Sertifikat SVG dibuat lokal dan belum diverifikasi atau diterbitkan oleh server.
 
-Login, progres, dan review memakai `localStorage`, sehingga tidak tersinkron antarperangkat/browser. Identitas penyimpanan progres dan review memakai nama akun serta slug kelas; perubahan nama akun dapat membuat data lama tidak terbaca, dan akun dengan nama sama berbagi data lokal. Proteksi route dan kelulusan di frontend bukan pengamanan backend.
+Progres dan review masih memakai `localStorage`, sehingga tidak tersinkron antarperangkat/browser. Identitas penyimpanan progres dan review memakai nama akun serta slug kelas; perubahan nama akun dapat membuat data lama tidak terbaca, dan akun dengan nama sama berbagi data lokal. Proteksi route dan kelulusan di frontend bukan pengamanan backend.
 
 ## Menjalankan secara lokal
 
-Salin `.env.example` menjadi `.env.local`, lalu isi keenam variabel `VITE_FIREBASE_*` dari Firebase Console > Project settings > Your apps. File `.env.local` diabaikan Git. Restart development server setelah mengubah nilainya.
+Salin `.env.example` menjadi `.env.local`, lalu isi keenam variabel `VITE_FIREBASE_*` dari Firebase Console > Project settings > Your apps. Aktifkan provider **Email/Password** di Firebase Authentication. File `.env.local` diabaikan Git. Restart development server setelah mengubah nilainya.
 
 Untuk Vercel, tambahkan variabel dengan nama dan nilai yang sama melalui **Settings > Environment Variables** pada environment deployment yang digunakan, lalu deploy ulang. Konfigurasi `vercel.json` sudah mengatur build Vite dengan base `/` dan output `dist`.
 
@@ -174,21 +175,34 @@ videobelajar/
 └── README.md
 ```
 
-File `login.html`, `register.html`, dan folder `assets/js/` merupakan peninggalan versi HTML sebelumnya. Halaman aplikasi React berada di `src/pages/` dan diakses melalui route di atas. Gambar kelas dan avatar instruktur dimuat dari layanan eksternal sehingga memerlukan koneksi internet.
+File HTML dan JavaScript versi lama diarsipkan dalam `legacy/` dan tidak termasuk entry build React. Aset CSS dan gambar yang masih diimpor React tetap berada di `assets/`. Halaman aplikasi React berada di `src/pages/` dan diakses melalui route di atas. Gambar kelas dan avatar instruktur dimuat dari layanan eksternal sehingga memerlukan koneksi internet.
 
 ## Mengelola detail kelas
 
 Semua kelas menggunakan satu template `src/pages/CourseDetailPage.jsx` dengan styling di `assets/css/course-detail.css`. Interaksi pembelian dan bagikan berada di `src/components/PurchaseCard.jsx`. Tidak perlu membuat halaman baru untuk setiap produk.
 
-1. Ubah informasi katalog di `src/data/courses.js`. Setiap kelas memiliki `slug` unik dan tetap sebagai bagian URL; pertahankan slug ketika hanya mengganti judul.
-2. Tambahkan konten dengan key slug yang sama di `src/data/courseDetails.js`: `description`, `tutorBio`, `modules` (judul bagian dan daftar `lessons` berisi `title` serta `minutes`), dan `reviews` (nama, batch, teks).
+1. Ubah informasi katalog di koleksi `courses` Firestore. Setiap kelas memiliki `slug` unik dan tetap sebagai bagian URL; pertahankan slug ketika hanya mengganti judul.
+2. Kelola konten terkait pada koleksi `modules`, `lessons`, dan `reviews` sesuai relasi yang dibaca `courseService`. File `src/data/courseDetails.js` hanya fixture/seed demo.
 3. Kartu kelas otomatis menuju `/course/:slug`. Jumlah video dihitung dari daftar pelajaran dan jumlah dokumen demo mengikuti jumlah modul.
 4. Jalankan `npm test` dan `npm run build` setelah perubahan. Slug yang tidak ditemukan menampilkan tautan kembali ke katalog.
 
 ## Mengelola metode pembayaran
 
-- Harga kelas disimpan sebagai angka rupiah (`priceAmount`) di `src/data/courses.js`; label harga katalog dan perhitungan checkout berasal dari nilai tersebut.
-- Kelompok metode, nama penyedia, dan biaya admin demo berada di `src/data/paymentMethods.js`. Pilihan awal adalah BCA; hanya satu metode aktif pada satu waktu.
+- Harga kelas berasal dari koleksi `courses` Firestore dan dinormalisasi menjadi `priceAmount`; label harga katalog dan perhitungan checkout berasal dari nilai tersebut.
+- Metode aktif dibaca dari koleksi `paymentMethods` Firestore. Biaya admin demo dan pemetaan logo berada di `src/data/paymentMethods.js`. Pengguna harus memilih satu metode sebelum checkout.
 - `src/components/PaymentMethods.jsx` menangani pilihan dan accordion. `src/pages/PaymentMethodPage.jsx` menangani ringkasan dan tahapan simulasi, dengan styling di `assets/css/payment-method.css`.
-- Alur pembayaran memakai `PaymentMethodPage.jsx` untuk pemilihan metode dan `PaymentPage.jsx` untuk instruksi serta hasil pembayaran demo. Memuat ulang halaman mengulang status simulasi pembayaran.
+- Alur pembayaran memakai `PaymentMethodPage.jsx` untuk pemilihan metode dan `PaymentPage.jsx` untuk instruksi serta hasil pembayaran demo. Status pesanan tersimpan di Firestore dan dimuat kembali setelah refresh.
 - Ringkasan kelas berada di kanan pada desktop dan di atas pilihan metode pada mobile; gambar kelas disembunyikan pada mobile. Logo metode pembayaran memakai aset PNG lokal di `assets/images/`, termasuk bank, e-wallet, Mastercard, VISA, dan JCB.
+
+
+## Batas keamanan dan integrasi
+
+- `VITE_FIREBASE_*` adalah konfigurasi SDK client yang terlihat di bundle browser. `.env` memisahkan konfigurasi, bukan menyembunyikan kredensial dari pengguna.
+- Login masih simulasi lokal. UID dari browser, pengecekan pemilik di service, dan route guard bukan otorisasi server. Security Rules yang diterapkan di Firebase belum diaudit oleh perubahan ini.
+- Sebelum memakai data pribadi/transaksi nyata, integrasikan Firebase Authentication dan verifikasi kepemilikan menggunakan `request.auth.uid` di Security Rules. Harga dan status pembayaran nyata harus ditentukan oleh backend/payment provider tepercaya.
+- Service profil hanya mengirim UID, nama, email, nomor HP, role demo, dan timestamp. Password, foto base64, dan daftar pesanan tidak dikirim. Foto, progres, ulasan yang ditulis pengguna, dan sertifikat masih lokal; sinkronisasi profil tidak memuat kembali profil lintas perangkat.
+- Jangan menaruh service-account key, token privat, atau secret backend pada variabel `VITE_*`.
+
+## Pola async dan performa
+
+`src/hooks/useAsyncResource.js` menyatukan loading, pesan kegagalan, retry, dan pengabaian response lama untuk katalog/pesanan. Error mutasi tidak menggantikan error pemuatan. Status sinkronisasi profil tersedia di halaman profil. Halaman belajar, kuis, dan sertifikat memakai lazy loading dengan fallback serta error boundary; gambar kartu kelas dimuat secara lazy. Firebase tetap memuat SDK pada bundle awal, sehingga optimasi ini tidak menjamin seluruh bundle di bawah 500 kB.

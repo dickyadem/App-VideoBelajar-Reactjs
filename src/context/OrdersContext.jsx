@@ -1,15 +1,15 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useAuth } from './AuthContext';
 import * as orderService from '../services/orderService';
+import { useAsyncResource } from '../hooks/useAsyncResource';
 
 const OrdersContext = createContext(null);
 
 function OrderState({ userId, children }) {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const load = useCallback(() => userId ? orderService.getOrders(userId) : Promise.resolve([]), [userId]);
+  const { data: orders, setData: setOrders, loading, error: loadError, reload } = useAsyncResource(load, [], 'Gagal memuat pesanan. Silakan coba lagi.');
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
-  const [attempt, setAttempt] = useState(0);
   const alive = useRef(false);
   const writing = useRef(false);
 
@@ -18,33 +18,20 @@ function OrderState({ userId, children }) {
     return () => { alive.current = false; };
   }, []);
 
-  useEffect(() => {
-    let active = true;
-    async function load() {
-      setLoading(true);
-      setError('');
-      try {
-        const result = await orderService.getOrders(userId);
-        if (active) setOrders(result);
-      } catch {
-        if (active) setError('Gagal memuat pesanan. Silakan coba lagi.');
-      } finally {
-        if (active) setLoading(false);
-      }
-    }
-    load();
-    return () => { active = false; };
-  }, [userId, attempt]);
-
   async function mutate(operation, apply) {
-    if (writing.current || loading || error) throw new Error('Tunggu sampai pesanan selesai diproses.');
+    if (writing.current || loading || loadError) throw new Error('Tunggu sampai pesanan selesai diproses.');
     writing.current = true;
     setPending(true);
+    setError('');
     try {
       const result = await operation();
       if (!alive.current) throw new Error('Sesi pesanan sudah berubah.');
       setOrders((current) => apply(current, result));
+      setError('');
       return result;
+    } catch (operationError) {
+      if (alive.current) setError('Operasi pesanan gagal. Silakan coba lagi.');
+      throw operationError;
     } finally {
       writing.current = false;
       if (alive.current) setPending(false);
@@ -69,7 +56,7 @@ function OrderState({ userId, children }) {
     await mutate(() => orderService.deleteOrder(userId, id), (current) => current.filter((item) => item.id !== id));
   }
 
-  return <OrdersContext.Provider value={{ orders, loading, error, pending, createOrder, updateOrder, deleteOrder, reload: () => setAttempt((value) => value + 1) }}>{children}</OrdersContext.Provider>;
+  return <OrdersContext.Provider value={{ orders, loading, loadError, error, pending, createOrder, updateOrder, deleteOrder, reload }}>{children}</OrdersContext.Provider>;
 }
 
 export function OrdersProvider({ children }) {

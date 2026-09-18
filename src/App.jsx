@@ -1,5 +1,5 @@
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import HomePage from './pages/HomePage';
 import CategoryPage from './pages/CategoryPage';
 import LoginPage from './pages/LoginPage';
@@ -11,16 +11,18 @@ import RequireAuth from './components/RequireAuth';
 import OrdersPage from './pages/OrdersPage';
 import ClassesPage from './pages/ClassesPage';
 import ProfilePage from './pages/ProfilePage';
-import LearningPage from './pages/LearningPage';
-import QuizPage from './pages/QuizPage';
-import CertificatePage from './pages/CertificatePage';
+import PageBoundary from './components/PageBoundary';
 import CatalogLayout from './components/CatalogLayout';
 import OrdersLayout from './components/OrdersLayout';
+
+const LearningPage = lazy(() => import('./pages/LearningPage'));
+const QuizPage = lazy(() => import('./pages/QuizPage'));
+const CertificatePage = lazy(() => import('./pages/CertificatePage'));
 
 function ProfileLinkRedirect() {
   const navigate = useNavigate();
   useEffect(() => {
-    const handleProfileClick = (event) => { 
+    const handleProfileClick = (event) => {
       const link = event.target.closest('a[aria-label="Profil Saya"]');
       if (!link) return;
       event.preventDefault();
@@ -34,7 +36,7 @@ function ProfileLinkRedirect() {
 
 export default function App() {
   return (
-    <><ProfileLinkRedirect /><Routes>
+    <><ProfileLinkRedirect /><PageBoundary><Suspense fallback={<main className="container section"><p role="status">Memuat halaman...</p></main>}><Routes>
       <Route element={<CatalogLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/category" element={<CategoryPage />} />
@@ -56,6 +58,6 @@ export default function App() {
       <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-    </Routes></>
+    </Routes></Suspense></PageBoundary></>
   );
 }

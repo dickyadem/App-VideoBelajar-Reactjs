@@ -46,3 +46,16 @@ test.each([
   expect(screen.getByRole('link', { name: 'Lihat Detail Pesanan' })).toHaveAttribute('href', '/orders');
   expect(screen.getByText(/Silakan cek email kamu/)).toBeInTheDocument();
 });
+
+
+test('does not claim clipboard success when access is denied', async () => {
+  const writeText = vi.fn().mockRejectedValue(new Error('denied'));
+  vi.stubGlobal('navigator', { clipboard: { writeText } });
+  await open();
+  fireEvent.click(screen.getByRole('button', { name: 'Salin' }));
+  expect(await screen.findByText('Nomor belum tersalin. Salin nomor virtual account secara manual.')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Tersalin' })).not.toBeInTheDocument();
+  writeText.mockResolvedValueOnce(undefined);
+  fireEvent.click(screen.getByRole('button', { name: 'Salin' }));
+  expect(await screen.findByRole('button', { name: 'Tersalin' })).toBeInTheDocument();
+});

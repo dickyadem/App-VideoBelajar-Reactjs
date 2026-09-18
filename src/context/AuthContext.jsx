@@ -1,51 +1,50 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { saveProfile } from '../services/profileService';
+import { createAccount, loginAccount, logoutAccount, subscribeToAuth, updateAccountProfile } from '../services/authService';
+import { auth } from '../firebase';
 
 const AuthContext = createContext(null);
 const key = 'videobelajar-user';
-const createId = () => globalThis.crypto?.randomUUID?.() || `user-${Date.now()}`;
-const identityKey = (profile) => `${profile.email ? 'email' : 'name'}:${(profile.email || profile.name || '').trim().toLowerCase()}`;
-
-// Demo identities persist on this browser; this is not Firebase Authentication.
-function demoUid(profile) {
-  let identities = {};
-  try { identities = JSON.parse(localStorage.getItem('videobelajar-demo-identities')) || {}; } catch {}
-  const identity = identityKey(profile);
-  const uid = profile.uid || identities[identity] || createId();
-  try { localStorage.setItem('videobelajar-demo-identities', JSON.stringify({ ...identities, [identity]: uid })); } catch {}
-  return uid;
-}
-
-const readUser = () => {
-  try {
-    const user = JSON.parse(localStorage.getItem(key));
-    return user ? { ...user, uid: demoUid(user) } : null;
-  } catch { return null; }
-};
+const profileFromFirebaseUser = (firebaseUser) => firebaseUser && ({ uid: firebaseUser.uid, name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Peserta', email: firebaseUser.email || '', isLoggedIn: true });
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(readUser);
-  useEffect(() => { if (user) localStorage.setItem(key, JSON.stringify(user)); else localStorage.removeItem(key); }, [user]);
+  const [user, setUser] = useState(null);
+  const [syncStatus, setSyncStatus] = useState('');
+  const [syncError, setSyncError] = useState('');
+  const [storageError, setStorageError] = useState('');
+  const [syncAttempt, setSyncAttempt] = useState(0);
+  useEffect(() => subscribeToAuth((firebaseUser) => setUser(profileFromFirebaseUser(firebaseUser))), []);
   useEffect(() => {
-    if (!user?.uid || !user.isLoggedIn) return;
-    const { orders, isLoggedIn, ...profile } = user;
-    setDoc(doc(db, 'users', user.uid), {
-      ...profile,
-      role: 'student',
-      updatedAt: serverTimestamp(),
-    }, { merge: true }).catch((error) => console.error('Gagal menyimpan user ke Firestore:', error));
+    try {
+      if (user) localStorage.setItem(key, JSON.stringify(user));
+      else localStorage.removeItem(key);
+      setStorageError('');
+    } catch { setStorageError('Sesi belum tersimpan di browser. Periksa ruang penyimpanan dan izin browser.'); }
   }, [user]);
-  const login = (name, profile = {}) => setUser((current) => {
-    const next = { ...(current && identityKey(current) === identityKey({ name, ...profile }) ? current : {}), ...profile, name, isLoggedIn: true };
-    return { ...next, uid: demoUid(next) };
-  });
-  const updateUser = (updates) => setUser((current) => {
-    if (!current) return current;
-    const next = { ...current, ...updates, isLoggedIn: true };
-    return { ...next, uid: demoUid(next) };
-  });
-  const logout = () => setUser(null);
-  return <AuthContext.Provider value={{ user, login, updateUser, logout }}>{children}</AuthContext.Provider>;
+  useEffect(() => {
+    let active = true;
+    setSyncError('');
+    setSyncStatus('');
+    if (!user?.uid || !user.isLoggedIn) return;
+    setSyncStatus('pending');
+    saveProfile(user).then(() => {
+      if (active) setSyncStatus('saved');
+    }).catch(() => {
+      if (active) {
+        setSyncStatus('');
+        setSyncError('Profil belum tersinkron ke Firebase. Silakan coba lagi.');
+      }
+    });
+    return () => { active = false; };
+  }, [user, syncAttempt]);
+  const login = async (email, password) => loginAccount(email, password);
+  const register = async (name, email, password) => createAccount(name, email, password);
+  const updateUser = async (updates) => {
+    if (!user) return;
+    if (updates.name && updates.name !== user.name) await updateAccountProfile(auth.currentUser, updates.name);
+    setUser((current) => current && { ...current, ...updates });
+  };
+  const logout = () => logoutAccount();
+  return <AuthContext.Provider value={{ user, login, register, updateUser, logout, syncStatus, syncError, storageError, retrySync: () => setSyncAttempt((value) => value + 1) }}>{children}</AuthContext.Provider>;
 }
 export const useAuth = () => useContext(AuthContext);

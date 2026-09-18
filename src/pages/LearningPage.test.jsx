@@ -1,5 +1,5 @@
 import { render } from '../test/renderWithCatalog';
-import { cleanup, fireEvent, screen, within } from '@testing-library/react';
+import { waitFor, cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, expect, test } from 'vitest';
 import App from '../App';
@@ -8,12 +8,13 @@ import { AuthProvider } from '../context/AuthContext';
 beforeEach(() => localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky', isLoggedIn: true })));
 afterEach(() => { cleanup(); localStorage.clear(); });
 
-function open(path = '/learn/big-4-auditor-financial-analyst') {
+async function open(path = '/learn/big-4-auditor-financial-analyst') {
   render(<MemoryRouter initialEntries={[path]}><AuthProvider><App /></AuthProvider></MemoryRouter>);
+  await waitFor(() => expect(screen.queryByText('Memuat halaman...')).not.toBeInTheDocument());
 }
 
-test('completed lessons show a check after next and after reopening the page', () => {
-  open();
+test('completed lessons show a check after next and after reopening the page', async () => {
+  await open();
   const sidebar = within(screen.getByRole('complementary', { name: 'Daftar modul' }));
   const lesson = sidebar.getByRole('button', { name: /Memahami neraca dan laba rugi/ });
   fireEvent.click(lesson);
@@ -24,12 +25,12 @@ test('completed lessons show a check after next and after reopening the page', (
   expect(nextLesson).toHaveClass('is-selected');
   expect(within(nextLesson).queryByRole('img', { name: 'Selesai' })).not.toBeInTheDocument();
   cleanup();
-  open();
+  await open();
   expect(within(screen.getByRole('complementary', { name: 'Daftar modul' })).getByRole('img', { name: 'Selesai' })).toBeInTheDocument();
 });
 
-test('opens summary before quiz and provides a course-specific download', () => {
-  open();
+test('opens summary before quiz and provides a course-specific download', async () => {
+  await open();
   const sidebar = within(screen.getByRole('complementary', { name: 'Daftar modul' }));
   fireEvent.click(sidebar.getByRole('button', { name: /Rangkuman:/ }));
   expect(screen.getByRole('heading', { name: 'Download Rangkuman Modul' })).toBeInTheDocument();
@@ -43,13 +44,13 @@ test('opens summary before quiz and provides a course-specific download', () => 
   expect(previous).toHaveTextContent('Presentasi analisis perusahaan');
   expect(next).toHaveTextContent('Quiz:');
   fireEvent.click(next);
-  expect(screen.getByRole('button', { name: 'Mulai Quiz' })).toBeInTheDocument();
+  expect(await screen.findByRole('button', { name: 'Mulai Quiz' })).toBeInTheDocument();
   fireEvent.click(previous);
   expect(screen.getByRole('heading', { name: 'Download Rangkuman Modul' })).toBeInTheDocument();
 });
 
-test('opens purchased course at the first item, Pre-Test', () => {
-  open();
+test('opens purchased course at the first item, Pre-Test', async () => {
+  await open();
   expect(screen.getByRole('heading', { name: 'Aturan' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Mulai Pre-Test' })).toBeInTheDocument();
   expect(within(screen.getByRole('complementary', { name: 'Daftar modul' })).getByRole('button', { name: /Pre-Test:/ })).toHaveClass('is-selected');
@@ -67,29 +68,29 @@ test('opens purchased course at the first item, Pre-Test', () => {
   expect(screen.queryByText('0% Modul Telah Selesai')).not.toBeInTheDocument();
 });
 
-test('selects another lesson from the module list', () => {
-  open();
+test('selects another lesson from the module list', async () => {
+  await open();
   fireEvent.click(within(screen.getByRole('complementary', { name: 'Daftar modul' })).getByRole('button', { name: /Membaca laporan arus kas/ }));
   expect(screen.getByRole('heading', { name: 'Membaca laporan arus kas' })).toBeInTheDocument();
 });
 
-test('redirects a guest to login', () => {
+test('redirects a guest to login', async () => {
   localStorage.clear();
-  open();
+  await open();
   expect(screen.getByRole('heading', { name: 'Masuk ke Akun' })).toBeInTheDocument();
 });
 
-test('opens quiz and final exam assessment states', () => {
-  open();
+test('opens quiz and final exam assessment states', async () => {
+  await open();
   fireEvent.click(screen.getByRole('button', { name: /Quiz:/ }));
   expect(screen.getByRole('heading', { name: 'Aturan' })).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: 'Mulai Quiz' })).toBeInTheDocument();
+  expect(await screen.findByRole('button', { name: 'Mulai Quiz' })).toBeInTheDocument();
   fireEvent.click(within(screen.getByRole('complementary', { name: 'Daftar modul' })).getByRole('button', { name: /Ujian Akhir:/ }));
   expect(screen.getByRole('button', { name: 'Mulai Ujian Akhir' })).toBeInTheDocument();
 });
 
-test('bottom navigation follows the entire module list forwards and backwards', () => {
-  open();
+test('bottom navigation follows the entire module list forwards and backwards', async () => {
+  await open();
   const sidebar = within(screen.getByRole('complementary', { name: 'Daftar modul' }));
   const items = sidebar.getAllByRole('button').filter((button) => button.querySelector('small'));
   const titles = items.map((button) => button.querySelector('small').parentElement.firstChild.textContent);

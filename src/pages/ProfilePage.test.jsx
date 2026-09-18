@@ -1,8 +1,9 @@
 import { render } from '../test/renderWithCatalog';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { afterEach, beforeEach, expect, test } from 'vitest';
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import App from '../App';
+import { setDoc } from 'firebase/firestore';
 import { AuthProvider } from '../context/AuthContext';
 
 beforeEach(() => localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky Adem', isLoggedIn: true })));
@@ -26,7 +27,7 @@ test('saves updated profile data', () => {
   fireEvent.change(screen.getByLabelText('Nama Lengkap'), { target: { value: 'Jannie Ruby Jane' } });
   fireEvent.change(screen.getByLabelText('E-Mail'), { target: { value: 'rubyjane@gmail.com' } });
   fireEvent.click(screen.getByRole('button', { name: 'Simpan' }));
-  expect(screen.getByRole('status')).toHaveTextContent('Profil berhasil disimpan');
+  expect(screen.getByText('Profil berhasil disimpan')).toBeInTheDocument();
   expect(JSON.parse(localStorage.getItem('videobelajar-user'))).toMatchObject({ name: 'Jannie Ruby Jane', email: 'rubyjane@gmail.com' });
 });
 
@@ -55,4 +56,15 @@ test('rejects unsupported or oversized photos', () => {
   expect(screen.getByRole('alert')).toHaveTextContent('JPG, PNG, atau WebP');
   fireEvent.change(input, { target: { files: [new File([new Uint8Array(1024 * 1024 + 1)], 'large.png', { type: 'image/png' })] } });
   expect(screen.getByRole('alert')).toHaveTextContent('maksimal 1 MB');
+});
+
+
+test('shows failed profile sync and allows retry without losing edits', async () => {
+  vi.mocked(setDoc).mockRejectedValueOnce(new Error('permission denied'));
+  open();
+  expect(await screen.findByText('Profil belum tersinkron ke Firebase. Silakan coba lagi.')).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText('Nama Lengkap'), { target: { value: 'Belum Disimpan' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Coba sinkronkan lagi' }));
+  expect(await screen.findByText('Data nama, email, dan nomor HP tersinkron.')).toBeInTheDocument();
+  expect(screen.getByLabelText('Nama Lengkap')).toHaveValue('Belum Disimpan');
 });

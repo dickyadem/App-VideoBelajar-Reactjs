@@ -1,5 +1,5 @@
 import { render } from '../test/renderWithCatalog';
-import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { waitFor, cleanup, fireEvent, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, expect, test } from 'vitest';
 import App from '../App';
@@ -12,20 +12,21 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); localStorage.clear(); });
 
-function open(path = '') {
+async function open(path = '') {
   render(<MemoryRouter initialEntries={[`/learn/big-4-auditor-financial-analyst${path}`]}><AuthProvider><App /></AuthProvider></MemoryRouter>);
+  await waitFor(() => expect(screen.queryByText('Memuat halaman...')).not.toBeInTheDocument());
   fireEvent.click(screen.getByRole('button', { name: /Beri Review & Rating/ }));
 }
 
-test.each(['', '/pretest', '/quiz', '/exam'])('opens and cancels review on %s', (path) => {
-  open(path);
+test.each(['', '/pretest', '/quiz', '/exam'])('opens and cancels review on %s', async (path) => {
+  await open(path);
   expect(screen.getByRole('dialog', { name: 'Tulis Review Terbaikmu!' })).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Batal' }));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
 
-test('saves rating and review, restores them after remount, and discards cancelled edits', () => {
-  open();
+test('saves rating and review, restores them after remount, and discards cancelled edits', async () => {
+  await open();
   expect(screen.getByRole('button', { name: 'Selesai' })).toBeDisabled();
   fireEvent.click(screen.getByRole('radio', { name: '4 bintang' }));
   fireEvent.change(screen.getByRole('textbox', { name: 'Review' }), { target: { value: 'Materinya mudah dipahami.' } });
@@ -33,7 +34,7 @@ test('saves rating and review, restores them after remount, and discards cancell
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   expect(screen.getByRole('status')).toHaveTextContent('Review tersimpan');
   cleanup();
-  open();
+  await open();
   expect(screen.getByRole('radio', { name: '4 bintang' })).toBeChecked();
   expect(screen.getByRole('textbox')).toHaveValue('Materinya mudah dipahami.');
   fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Batal disimpan' } });
