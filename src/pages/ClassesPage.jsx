@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { courses } from '../data/courses';
-import { courseDetails } from '../data/courseDetails';
+import { useCatalog } from '../context/CatalogContext';
+
 import { useOrders } from '../context/useOrders';
 import { useAuth } from '../context/AuthContext';
 import '../../assets/css/classes.css';
@@ -25,6 +25,7 @@ function ClassCard({ enrollment }) {
 }
 
 export default function ClassesPage() {
+  const { courses, courseDetails } = useCatalog();
   const { orders } = useOrders();
   const { user } = useAuth();
   const enrollments = courses.filter((course) => orders.some((order) => order.slug === course.slug && order.status === 'Berhasil')).map((course) => {

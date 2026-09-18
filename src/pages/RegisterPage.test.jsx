@@ -1,5 +1,6 @@
+import { render } from '../test/renderWithCatalog';
 import App from '../App';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, test } from 'vitest';
 import RegisterPage from './RegisterPage';

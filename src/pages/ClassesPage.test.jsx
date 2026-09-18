@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { render, waitForOrders } from '../test/renderWithCatalog';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, expect, test } from 'vitest';
 import App from '../App';
@@ -12,21 +13,22 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); localStorage.clear(); });
 
-function open(path = '/classes') {
+async function open(path = '/classes') {
   render(<MemoryRouter initialEntries={[path]}><AuthProvider><App /></AuthProvider></MemoryRouter>);
+  await waitForOrders();
 }
 
-test('renders the classes page with progress cards', () => {
-  open();
-  expect(screen.getByRole('heading', { name: 'Daftar Kelas' })).toBeInTheDocument();
+test('renders the classes page with progress cards', async () => {
+  await open();
+  expect(await screen.findByRole('heading', { name: 'Daftar Kelas' })).toBeInTheDocument();
   expect(screen.getByLabelText('Kelas Saya')).toHaveAttribute('href', '/classes');
   expect(screen.getByRole('tab', { name: 'Semua Kelas' })).toHaveAttribute('aria-selected', 'true');
   expect(screen.getAllByRole('article')).toHaveLength(3);
   expect(screen.getByText('100%')).toBeInTheDocument();
 });
 
-test('filters running and completed classes', () => {
-  open();
+test('filters running and completed classes', async () => {
+  await open();
   fireEvent.click(screen.getByRole('tab', { name: 'Sedang Berjalan' }));
   expect(screen.getAllByRole('article', { name: /Kelas/ })).toHaveLength(2);
   fireEvent.click(screen.getByRole('tab', { name: 'Selesai' }));
@@ -34,26 +36,26 @@ test('filters running and completed classes', () => {
   expect(screen.getByRole('link', { name: 'Unduh Sertifikat' })).toHaveAttribute('href', `/course/${courses[0].slug}/certificate`);
 });
 
-test('class actions open the video learning page', () => {
-  open();
+test('class actions open the video learning page', async () => {
+  await open();
   expect(screen.getByRole('link', { name: 'Lihat Detail Kelas' })).toHaveAttribute('href', '/learn/big-4-auditor-financial-analyst');
   fireEvent.click(screen.getByRole('tab', { name: 'Sedang Berjalan' }));
   expect(screen.getAllByRole('link', { name: 'Lanjutkan Pembelajaran' })[0]).toHaveAttribute('href', '/learn/strategi-marketing-berbasis-data');
 });
 
-test('searches classes by title', () => {
-  open();
+test('searches classes by title', async () => {
+  await open();
   fireEvent.change(screen.getByRole('searchbox', { name: 'Cari Kelas' }), { target: { value: 'tidak ada' } });
   expect(screen.getByText('Kelas tidak ditemukan')).toBeInTheDocument();
 });
 
-test('redirects a guest to login', () => {
+test('redirects a guest to login', async () => {
   localStorage.clear();
-  open();
-  expect(screen.getByRole('heading', { name: 'Masuk ke Akun' })).toBeInTheDocument();
+  await open();
+  expect(await screen.findByRole('heading', { name: 'Masuk ke Akun' })).toBeInTheDocument();
 });
 
-test('only includes successful purchases without duplicate classes', () => {
+test('only includes successful purchases without duplicate classes', async () => {
   localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky', isLoggedIn: true, orders: [
     { slug: courses[1].slug, status: 'Berhasil' },
     { slug: courses[1].slug, status: 'Berhasil' },
@@ -61,16 +63,16 @@ test('only includes successful purchases without duplicate classes', () => {
     { slug: courses[0].slug, status: 'Gagal' },
   ] }));
   localStorage.setItem(`videobelajar-progress:Dicky:${courses[1].slug}`, JSON.stringify(['pretest']));
-  open();
+  await open();
   expect(screen.getAllByRole('article')).toHaveLength(1);
   expect(screen.getByRole('article')).toHaveTextContent('1 / 11 Modul Terselesaikan');
   expect(screen.getByRole('article')).toHaveTextContent('9%');
   expect(screen.queryByRole('link', { name: 'Unduh Sertifikat' })).not.toBeInTheDocument();
 });
 
-test('shows an empty state before the first purchase', () => {
+test('shows an empty state before the first purchase', async () => {
   localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky', isLoggedIn: true }));
-  open();
+  await open();
   expect(screen.getByText('Belum ada kelas yang dibeli')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Jelajahi Kelas' })).toHaveAttribute('href', '/category');
 });

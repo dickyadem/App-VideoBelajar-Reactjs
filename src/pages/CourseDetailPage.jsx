@@ -4,8 +4,8 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import CourseCard from '../components/CourseCard';
 import PurchaseCard from '../components/PurchaseCard';
-import { courses } from '../data/courses';
-import { courseDetails } from '../data/courseDetails';
+import { useCatalog } from '../context/CatalogContext';
+
 import '../../assets/css/course-detail.css';
 
 const categoryLabels = { business: 'Bisnis Manajemen', marketing: 'Pemasaran', design: 'Desain', personal: 'Pengembangan Diri' };
@@ -15,6 +15,7 @@ function Rating({ label }) {
 }
 
 function CourseContent({ course, detail }) {
+  const { courses, categories } = useCatalog();
   const related = courses.filter((item) => item.slug !== course.slug)
     .sort((a, b) => Number(b.category === course.category) - Number(a.category === course.category))
     .slice(0, 3);
@@ -23,7 +24,7 @@ function CourseContent({ course, detail }) {
     <main className="course-detail container">
       <nav className="detail-breadcrumb" aria-label="Breadcrumb">
         <Link to="/">Beranda</Link><span aria-hidden="true">/</span>
-        <Link to="/category">{categoryLabels[course.category]}</Link><span aria-hidden="true">/</span>
+        <Link to="/category">{categoryLabels[course.category] || categories.find(([slug]) => slug === course.category)?.[1] || course.category}</Link><span aria-hidden="true">/</span>
         <span aria-current="page">{course.title}</span>
       </nav>
 
@@ -55,6 +56,7 @@ function CourseContent({ course, detail }) {
 
           <section className="detail-panel curriculum" aria-labelledby="curriculum-title">
             <h2 id="curriculum-title">Kamu akan Mempelajari</h2>
+            {!detail.modules.length && <p>Materi kelas belum tersedia.</p>}
             {detail.modules.map((section, index) => (
               <details key={section.title} open={index === 0}>
                 <summary>{section.title}<span className="curriculum-chevron" aria-hidden="true">⌄</span></summary>
@@ -72,10 +74,10 @@ function CourseContent({ course, detail }) {
 
           <section id="course-reviews" className="detail-panel" aria-labelledby="reviews-title">
             <h2 id="reviews-title">Rating dan Review</h2>
-            <p className="detail-demo-note">Contoh ulasan untuk tampilan demo.</p>
+            {!detail.reviews.length && <p>Belum ada ulasan untuk kelas ini.</p>}
             <div className="detail-review-grid">
               {detail.reviews.map((review) => (
-                <article className="detail-person" key={review.name}>
+                <article className="detail-person" key={review.id || review.name}>
                   <div className="detail-person-heading">
                     <span className="review-avatar" aria-hidden="true">{review.name.split(' ').map((word) => word[0]).join('')}</span>
                     <div><h3>{review.name}</h3><p>{review.batch}</p></div>
@@ -103,6 +105,7 @@ function CourseContent({ course, detail }) {
 }
 
 export default function CourseDetailPage() {
+  const { courses, courseDetails } = useCatalog();
   const { slug } = useParams();
   useEffect(() => { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }, [slug]);
   const course = courses.find((item) => item.slug === slug);

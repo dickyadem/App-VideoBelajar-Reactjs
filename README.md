@@ -59,6 +59,14 @@ Login, progres, dan review memakai `localStorage`, sehingga tidak tersinkron ant
 
 ## Menjalankan secara lokal
 
+Salin `.env.example` menjadi `.env.local`, lalu isi keenam variabel `VITE_FIREBASE_*` dari Firebase Console > Project settings > Your apps. File `.env.local` diabaikan Git. Restart development server setelah mengubah nilainya.
+
+Untuk Vercel, tambahkan variabel dengan nama dan nilai yang sama melalui **Settings > Environment Variables** pada environment deployment yang digunakan, lalu deploy ulang. Konfigurasi `vercel.json` sudah mengatur build Vite dengan base `/` dan output `dist`.
+
+Workflow GitHub Pages membaca keenam variabel dari GitHub **Settings > Secrets and variables > Actions > Variables**. Isi variabel tersebut jika masih memakai deployment GitHub Pages.
+
+Variabel `VITE_*` masuk ke bundle browser, sehingga hanya digunakan untuk konfigurasi Firebase client. Jangan menyimpan service-account/private key di sini; akses database tetap diatur melalui Firebase Authentication dan Security Rules.
+
 Gunakan Node.js `20.19+` pada versi 20, atau `22.12+`, serta npm sesuai persyaratan Vite yang terpasang.
 
 Dari direktori proyek, jalankan:

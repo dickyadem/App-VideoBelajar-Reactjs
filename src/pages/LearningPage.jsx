@@ -6,8 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import CourseProgress, { ModuleIcon, useCourseProgress } from '../components/CourseProgress';
 import ReviewButton from '../components/ReviewButton';
 import Footer from '../components/Footer';
-import { courses } from '../data/courses';
-import { courseDetails } from '../data/courseDetails';
+import { useCatalog } from '../context/CatalogContext';
+
 import '../../assets/css/learning.css';
 
 const pretest = { type: 'pretest', title: 'Pre-Test: Introduction to HR', minutes: 5 };
@@ -20,6 +20,7 @@ function LessonList({ detail, selectedLesson, onSelect, progress }) {
 }
 
 export default function LearningPage() {
+  const { courses, courseDetails } = useCatalog();
   const { slug } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();

@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { render } from '../test/renderWithCatalog';
+import { cleanup, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, test } from 'vitest';
 import App from '../App';
