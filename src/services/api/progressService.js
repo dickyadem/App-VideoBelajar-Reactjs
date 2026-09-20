@@ -1,5 +1,5 @@
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../../firebase';
 
 function progressReference(userId, slug) {
   return doc(db, 'users', userId, 'progress', slug);

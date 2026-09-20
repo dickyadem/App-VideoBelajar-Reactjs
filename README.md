@@ -20,7 +20,7 @@ Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Mencakup katalog
 
 ### CRUD pesanan
 
-- **Create:** pilih metode lalu klik **Beli Sekarang** untuk menambahkan pesanan berstatus **Belum Bayar**. Checkout ulang kelas yang sama menggunakan pesanan belum dibayar yang sudah ada.
+- **Create:** pilih metode lalu klik **Beli Sekarang** untuk menambahkan pesanan berstatus **Belum Bayar**. Checkout ulang kelas yang sama menggunakan pesanan belum dibayar yang sudah ada; kelas berstatus **Berhasil** tidak dapat dibeli ulang.
 - **Read:** halaman Pesanan menampilkan judul kelas, invoice, tanggal, metode, harga dan total termasuk biaya admin. Pencarian, filter, dan pengurutan memakai data pesanan pengguna.
 - **Update:** **Ubah Metode** memperbarui pesanan yang sama; **Bayar Sekarang** pada halaman pembayaran mengubah status menjadi **Berhasil** (simulasi).
 - **Delete:** pesanan belum dibayar dapat dihapus melalui **Hapus Pesanan → Ya, Hapus**. **Batal** mempertahankan pesanan.
@@ -49,6 +49,122 @@ Pesanan disimpan di koleksi `orders` Firestore melalui `orderService` dan `Order
 - Modal **Beri Review & Rating** dengan pilihan 1–5 bintang, teks review, pembatalan, dan penyimpanan lokal.
 - Pop-up penyelesaian seluruh modul menuju halaman sertifikat dengan nama peserta, informasi kelas, dan download gambar SVG.
 - Layout mobile untuk halaman pembelajaran dan ujian, dengan tombol sentuh, teks jawaban, serta header progres yang disesuaikan.
+
+## Flow aplikasi
+
+Diagram alur utama aplikasi:
+
+```mermaid
+flowchart TD
+	A[Pengunjung membuka aplikasi] --> B{Sudah login?}
+	B -- Tidak --> C[Beranda / Katalog / Detail Kelas]
+	C --> D{Ingin membeli kelas?}
+	D -- Tidak --> C
+	D -- Ya --> E[Login / Register]
+	B -- Ya --> F[Beranda / Katalog / Detail Kelas]
+	E --> G[Firebase Authentication]
+	G --> H{Login berhasil?}
+	H -- Tidak --> I[Tampilkan pesan error]
+	I --> E
+	H -- Ya --> F
+	F --> J[Klik Beli Sekarang]
+	J --> K[Pilih Metode Pembayaran]
+	K --> L{Metode dipilih?}
+	L -- Tidak --> K
+	L -- Ya --> M[Klik Beli Sekarang]
+	M --> N[Buat order Firestore<br/>status: Belum Bayar]
+	N --> O[Halaman Pembayaran]
+	O --> P[Klik Bayar Sekarang]
+	P --> Q[Update order<br/>status: Berhasil]
+	Q --> R[Pembayaran Berhasil]
+	R --> S[Pesanan Saya / Kelas Saya]
+	S --> T{Order belum dibayar?}
+	T -- Tidak --> S
+	T -- Ya --> U[Klik Ubah Metode]
+	U --> V[Ubah Metode Pembayaran]
+	V --> W[Pilih metode baru]
+	W --> X[Klik Bayar Sekarang]
+	X --> Y[Update metode + status<br/>dalam order yang sama]
+	Y --> R
+	S --> Z[Mulai Belajar]
+	Z --> AA[Pre-Test]
+	AA --> AB[Video Pembelajaran]
+	AB --> AC[Rangkuman]
+	AC --> AD[Quiz]
+	AD --> AE[Ujian Akhir]
+	AE --> AF{Semua materi selesai?}
+	AF -- Tidak --> Z
+	AF -- Ya --> AG[Ambil Sertifikat]
+	AG --> AH[Download Sertifikat]
+```
+
+Flow khusus **Ubah Metode Pembayaran**:
+
+```mermaid
+flowchart LR
+	A[Pesanan Belum Bayar] --> B[Klik Ubah Metode]
+	B --> C[Halaman Ubah Metode Pembayaran]
+	C --> D[Pilih metode baru]
+	D --> E[Klik Bayar Sekarang]
+	E --> F[Update metode + status Berhasil]
+	F --> G[Pembayaran Berhasil]
+```
+
+Pada flow ubah metode, tidak dibuat order baru. Order yang sama diperbarui dengan metode baru dan status `Berhasil`.
+
+### Autentikasi
+
+1. Pengunjung dapat membuka beranda, katalog, dan detail kelas tanpa login.
+2. Halaman yang membutuhkan akun, seperti pembayaran, pesanan, kelas saya, belajar, ujian, profil, dan sertifikat, mengarahkan pengunjung ke `/#/login`.
+3. Pengguna baru membuka `/#/register`, mengisi nama, email, nomor HP, kata sandi, dan konfirmasi kata sandi.
+4. Firebase Authentication membuat akun, kemudian aplikasi mengarahkan pengguna ke Login. Registrasi tidak langsung membuat sesi login.
+5. Setelah login berhasil, Firebase mengirim UID melalui `onAuthStateChanged`. Profil user disimpan atau dibaca dari `users/{uid}` Firestore dan sesi dipulihkan saat halaman dimuat ulang.
+6. Jika kredensial salah, provider belum aktif, atau koneksi gagal, form menampilkan pesan error Firebase yang sesuai.
+
+### Pembelian kelas baru
+
+1. Dari detail kelas, klik **Beli Sekarang** untuk membuka `/#/course/:slug/payment`.
+2. Pilih satu metode pembayaran pada accordion bank, e-wallet, atau kartu. Klik pada seluruh baris metode, bukan hanya radio atau logonya.
+3. Klik **Beli Sekarang**. Aplikasi membuat satu dokumen `orders` berstatus **Belum Bayar**, lalu membuka `/#/course/:slug/pay?order=...&method=...`.
+4. Halaman pembayaran menampilkan virtual account demo, ringkasan pesanan, biaya admin Rp7.000, instruksi pembayaran, dan tombol **Bayar Sekarang**.
+5. Klik **Bayar Sekarang**. Aplikasi mengubah status order menjadi **Berhasil**, menambahkan `status=success` pada URL, dan menampilkan **Pembayaran Berhasil!**.
+6. Klik **Lihat Detail Pesanan** untuk membuka Pesanan Saya. Order berhasil juga menjadi sumber Kelas Saya.
+7. Jika kelas sudah memiliki order berstatus **Berhasil**, checkout menampilkan **Kelas Sudah Dibeli** dan tautan **Buka Kelas Saya**, tanpa membuat order duplikat.
+
+### Mengubah metode pembayaran
+
+Flow ini berlaku hanya untuk order berstatus **Belum Bayar**.
+
+1. Buka Pesanan Saya dan klik **Ubah Metode** pada order yang belum dibayar.
+2. Halaman membuka `/#/course/:slug/payment?change=1&order=...` dengan judul **Ubah Metode Pembayaran**.
+3. Pilih metode baru, misalnya dari **Bank BNI** ke **Bank BRI**.
+4. Klik **Bayar Sekarang**. Dalam mode `change=1`, aplikasi memperbarui metode dan status menjadi **Berhasil** dalam satu operasi pada order yang sama.
+5. Aplikasi langsung membuka URL pembayaran dengan `status=success` dan menampilkan **Pembayaran Berhasil!**. Tidak ada ringkasan checkout kedua dan tidak dibuat order duplikat.
+
+### Pesanan dan kegagalan operasi
+
+- **Lanjutkan Pembayaran** membuka kembali instruksi pembayaran untuk order **Belum Bayar**.
+- **Hapus Pesanan** meminta konfirmasi. **Ya, Hapus** menghapus order; **Batal** mempertahankannya.
+- Loading memblokir aksi berulang sampai operasi server selesai.
+- Jika pembacaan gagal, UI menampilkan error dan tombol coba lagi.
+- Jika penulisan gagal, form atau order tetap dipertahankan agar pengguna dapat mengulangi operasi.
+- Semua operasi order memeriksa UID pemilik pada service Firebase. Status pembayaran di aplikasi ini adalah simulasi, bukan transaksi uang nyata.
+
+### Flow belajar sampai sertifikat
+
+1. Dari Kelas Saya, buka kelas berstatus **Berhasil**.
+2. Selesaikan Pre-Test, video, rangkuman, Quiz, dan Ujian Akhir sesuai urutan modul.
+3. Video ditandai selesai melalui tombol berikutnya; membuka item sidebar saja tidak menyelesaikan materi.
+4. Quiz dan Ujian Akhir membutuhkan nilai minimal 60. Setelah seluruh materi selesai, dialog penyelesaian muncul.
+5. Klik **Ambil Sertifikat**, lalu **Download Sertifikat** pada halaman sertifikat.
+
+### Data katalog, profil, dan media
+
+- Katalog dan metode aktif dibaca dari Firestore saat aplikasi dimuat. Katalog lokal hanya digunakan sebagai fixture dan seed manual.
+- Semua service pemanggilan backend berada di `src/services/api/`: `authService`, `catalogService`, `courseApi`, `orderService`, `profileService`, `progressService`, `seedService`, dan `cloudinaryService`.
+- `courseApi.js` menjadi service course Firebase dan menyediakan pembacaan katalog serta operasi CRUD course.
+- Foto profil diunggah ke Cloudinary. Jika URL foto gagal dimuat, Header dan halaman Profil menampilkan inisial user sebagai fallback.
+- Progress tersimpan di Firestore berdasarkan UID dan slug kelas; review dan sertifikat masih lokal.
 
 ### Batasan saat ini
 
@@ -163,7 +279,7 @@ videobelajar/
 │   ├── components/       # Header, Footer, CourseProgress, ReviewButton, form, dll.
 │   ├── context/          # AuthContext, CatalogContext, OrdersContext
 │   ├── hooks/             # Hook async resource dan progres belajar
-│   ├── services/          # Service Firebase, Axios, Cloudinary, dan profil
+│   ├── services/api/      # Semua service pemanggilan Firebase dan Cloudinary
 │   ├── data/             # Data kelas dan pengujiannya
 │   ├── pages/            # Katalog, checkout, belajar, Quiz, Certificate, dan pengujian
 │   └── test/setup.js     # Setup lingkungan pengujian

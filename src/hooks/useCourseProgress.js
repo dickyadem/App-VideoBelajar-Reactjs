@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getProgress, saveProgress } from '../services/progressService';
+import { getProgress, saveProgress } from '../services/api/progressService';
 
 export function useCourseProgress(slug, detail) {
   const { user } = useAuth();

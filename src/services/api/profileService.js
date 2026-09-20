@@ -1,5 +1,5 @@
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../../firebase';
 
 export async function saveProfile(user) {
   if (!user?.uid || user.uid.includes('/')) throw new Error('Identitas profil tidak valid.');

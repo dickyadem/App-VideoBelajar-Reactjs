@@ -1,4 +1,4 @@
-import { getCourseCatalog, readCollection } from './courseService';
+import { getCourseCatalog, readCollection } from './courseApi';
 
 const categoryLabels = { marketing: 'Pemasaran', design: 'Desain', personal: 'Pengembangan Diri', business: 'Bisnis' };
 const paymentLabels = { bank: 'Transfer Bank', ewallet: 'E-Wallet', card: 'Kartu Kredit/Debit' };

@@ -1,6 +1,6 @@
 import { collection, doc, getDocsFromServer, query, runTransaction, serverTimestamp, where } from 'firebase/firestore';
-import { db } from '../firebase';
-import { ADMIN_FEE } from '../data/paymentMethods';
+import { db } from '../../firebase';
+import { ADMIN_FEE } from '../../data/paymentMethods';
 
 function requireText(value, message) {
   if (typeof value !== 'string' || !value.trim()) throw new Error(message);

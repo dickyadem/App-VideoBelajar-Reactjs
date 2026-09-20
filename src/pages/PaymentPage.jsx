@@ -70,12 +70,18 @@ function PaymentPageContent({ course, detail, method, initialStatus = '' }) {
       if (!order) {
         if (params.has('order')) throw new Error('Pesanan tidak ditemukan.');
         const id = await createOrder(course, method.id, 'Berhasil');
-        if (mounted.current) navigate('/course/' + course.slug + '/pay?order=' + id + '&method=' + method.id);
+        if (mounted.current) {
+          setResultStatus('success');
+          navigate(`/course/${course.slug}/pay?order=${id}&method=${method.id}&status=success`, { replace: true });
+        }
         return;
       }
       await updateOrder(order.id, { status: 'Berhasil' });
-      if (mounted.current) setResultStatus('success');
-    } catch { if (mounted.current) setError('Pembayaran belum diproses. Periksa koneksi lalu coba lagi.'); }
+      if (mounted.current) {
+        setResultStatus('success');
+        navigate(`/course/${course.slug}/pay?order=${order.id}&method=${method.id}&status=success`, { replace: true });
+      }
+    } catch (paymentError) { if (mounted.current) setError(paymentError?.message || 'Pembayaran belum diproses. Periksa koneksi lalu coba lagi.'); }
   };
   const [resultStatus, setResultStatus] = useState(initialStatus);
   const complete = order?.status === 'Berhasil' || Boolean(resultStatus);

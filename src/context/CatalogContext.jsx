@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { getCatalog } from '../services/catalogService';
+import { getCatalog } from '../services/api/catalogService';
 import { useAsyncResource } from '../hooks/useAsyncResource';
 
 export const CatalogContext = createContext(null);

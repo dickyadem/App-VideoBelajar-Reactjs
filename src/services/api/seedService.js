@@ -1,8 +1,8 @@
 import { doc, writeBatch } from 'firebase/firestore';
-import { db } from '../firebase';
-import { courses } from '../data/courses';
-import { courseDetails } from '../data/courseDetails';
-import { paymentGroups } from '../data/paymentMethods';
+import { db } from '../../firebase';
+import { courses } from '../../data/courses';
+import { courseDetails } from '../../data/courseDetails';
+import { paymentGroups } from '../../data/paymentMethods';
 
 const parseRating = (rating) => Number.parseFloat(rating) || 0;
 const parseReviewCount = (rating) => Number.parseInt(rating.match(/\((\d+)\)/)?.[1] || '0', 10);

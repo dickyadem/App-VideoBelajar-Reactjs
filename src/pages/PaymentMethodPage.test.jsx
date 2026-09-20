@@ -76,8 +76,7 @@ test('returns to payment after changing the payment method', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'E-Wallet' }));
   fireEvent.click(screen.getByRole('radio', { name: 'Dana' }));
   fireEvent.click(screen.getByRole('button', { name: 'Bayar Sekarang' }));
-  expect(await screen.findByRole('heading', { name: 'Pembayaran' })).toBeInTheDocument();
-  expect(screen.queryByRole('heading', { name: 'Pembayaran Berhasil!' })).not.toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: 'Pembayaran Berhasil!' })).toBeInTheDocument();
 });
 
 test('shows the change method page as an actual payment step', async () => {
@@ -92,4 +91,16 @@ test('handles missing courses without offering payment', async () => {
   expect(await screen.findByRole('heading', { name: 'Kelas tidak ditemukan' })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Beli Sekarang' })).not.toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Jelajahi kelas' })).toHaveAttribute('href', '/category');
+});
+
+test('blocks checkout when the course was already purchased successfully', async () => {
+  localStorage.setItem('videobelajar-user', JSON.stringify({
+    name: 'Dicky',
+    isLoggedIn: true,
+    orders: [{ id: 'paid-course', slug: 'design-thinking-praktis', status: 'Berhasil' }],
+  }));
+  await open('/course/design-thinking-praktis/payment');
+  expect(await screen.findByRole('heading', { name: 'Kelas Sudah Dibeli' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Buka Kelas Saya' })).toHaveAttribute('href', '/classes');
+  expect(screen.queryByRole('button', { name: 'Beli Sekarang' })).not.toBeInTheDocument();
 });

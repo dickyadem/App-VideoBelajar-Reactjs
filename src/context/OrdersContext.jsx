@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useAuth } from './AuthContext';
-import * as orderService from '../services/orderService';
+import * as orderService from '../services/api/orderService';
 import { useAsyncResource } from '../hooks/useAsyncResource';
 
 const OrdersContext = createContext(null);

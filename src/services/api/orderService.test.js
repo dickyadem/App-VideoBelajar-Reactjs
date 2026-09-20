@@ -1,7 +1,7 @@
 import { beforeEach, expect, test, vi } from 'vitest';
 
 vi.unmock('./orderService');
-vi.mock('../firebase', () => ({ db: {} }));
+vi.mock('../../firebase', () => ({ db: {} }));
 vi.mock('firebase/firestore', () => ({
   collection: vi.fn((_db, path) => path),
   doc: vi.fn((...args) => args.length === 1 ? { id: 'new-order', path: 'orders/new-order' } : `${args[1]}/${args[2]}`),

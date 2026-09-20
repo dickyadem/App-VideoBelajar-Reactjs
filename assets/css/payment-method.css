@@ -41,6 +41,7 @@
 .payment-option input { position: absolute; width: 1px; height: 1px; margin: -1px; clip-path: inset(50%); overflow: hidden; }
 .payment-option:focus-within { outline: 3px solid var(--primary-dark); outline-offset: 2px; }
 .payment-option-name { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.payment-option-name, .payment-card-brands, .payment-selected { pointer-events: none; }
 .payment-selected { display: grid; place-items: center; visibility: hidden; flex: 0 0 20px; height: 20px; border-radius: 50%; color: white; background: #ff4b27; font-size: 15px; font-weight: 700; }
 .payment-option input:checked ~ .payment-selected { visibility: visible; }
 
@@ -123,4 +124,4 @@
   .summary-row { font-size: 14px; }
   .summary-total strong { font-size: 18px; }
 }
-.payment-logo-image { display: block; width: 64px; height: 32px; flex: 0 0 64px; object-fit: contain; }
+.payment-logo-image { display: block; width: 64px; height: 32px; flex: 0 0 64px; object-fit: contain; pointer-events: none; }

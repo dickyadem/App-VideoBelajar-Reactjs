@@ -22,9 +22,9 @@ function Checkout({ course, detail }) {
     try {
       const existing = orders.find((item) => item.id === searchParams.get('order') && item.slug === course.slug);
       let id;
-      if (searchParams.has('order')) { if (!existing) throw new Error('Pesanan tidak ditemukan.'); await updateOrder(existing.id, { method: selectedPayment }); id = existing.id; }
+      if (searchParams.has('order')) { if (!existing) throw new Error('Pesanan tidak ditemukan.'); await updateOrder(existing.id, isChangingMethod ? { method: selectedPayment, status: 'Berhasil' } : { method: selectedPayment }); id = existing.id; }
       else id = await createOrder(course, selectedPayment);
-      if (mounted.current) navigate('/course/' + course.slug + '/pay?order=' + id + '&method=' + selectedPayment, { state: { orderMessage: 'Pesanan berhasil disimpan.' } });
+      if (mounted.current) navigate(`/course/${course.slug}/pay?order=${id}&method=${selectedPayment}${isChangingMethod ? '&status=success' : ''}`, { state: { orderMessage: 'Pesanan berhasil disimpan.' } });
     } catch { if (mounted.current) setError('Pesanan belum tersimpan. Periksa koneksi lalu coba lagi.'); }
   };
   const isChangingMethod = searchParams.get('change') === '1';
@@ -36,6 +36,16 @@ function Checkout({ course, detail }) {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     return () => { mounted.current = false; };
   }, []);
+
+  const completedOrder = !isChangingMethod && orders.some((item) => item.slug === course.slug && item.status === 'Berhasil');
+  if (completedOrder) return <div className="checkout-page">
+    <header className="checkout-header">
+      <div className="checkout-desktop-logo"><Link className="logo" to="/" aria-label="videobelajar Beranda"><img src={`${import.meta.env.BASE_URL}assets/images/logo.png`} alt="videobelajar" /></Link></div>
+      <div className="checkout-mobile-header"><Header /></div>
+    </header>
+    <main className="container checkout-not-found"><h1>Kelas Sudah Dibeli</h1><p>Kelas ini sudah berhasil dibeli dan tersedia di Kelas Saya.</p><Link className="btn btn-primary" to="/classes">Buka Kelas Saya</Link></main>
+    <Footer />
+  </div>;
 
   return <div className="checkout-page">
     <header className="checkout-header">

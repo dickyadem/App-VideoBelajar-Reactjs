@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { getProfile, saveProfile } from '../services/profileService';
-import { createAccount, loginAccount, logoutAccount, subscribeToAuth, updateAccountProfile } from '../services/authService';
+import { getProfile, saveProfile } from '../services/api/profileService';
+import { createAccount, loginAccount, logoutAccount, subscribeToAuth, updateAccountProfile } from '../services/api/authService';
 import { auth } from '../firebase';
 
 const AuthContext = createContext(null);

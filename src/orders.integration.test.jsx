@@ -5,8 +5,8 @@ import { render } from './test/renderWithCatalog';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 
-vi.mock('./services/orderService', () => ({ getOrders: vi.fn(), createOrder: vi.fn(), updateOrder: vi.fn(), deleteOrder: vi.fn() }));
-import * as ordersApi from './services/orderService';
+vi.mock('./services/api/orderService', () => ({ getOrders: vi.fn(), createOrder: vi.fn(), updateOrder: vi.fn(), deleteOrder: vi.fn() }));
+import * as ordersApi from './services/api/orderService';
 
 const order = { id: 'remote-order', userId: 'user-1', slug: 'design-thinking-praktis', title: 'Design Thinking Praktis', category: 'design', image: '/course.webp', price: 275000, total: 282000, method: 'bca', status: 'Belum Bayar', date: '2026-09-18T00:00:00.000Z' };
 beforeEach(() => {

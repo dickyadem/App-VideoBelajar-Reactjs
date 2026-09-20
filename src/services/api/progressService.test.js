@@ -7,7 +7,7 @@ const firestore = {
   serverTimestamp: vi.fn(() => 'timestamp'),
 };
 vi.mock('firebase/firestore', () => firestore);
-vi.mock('../firebase', () => ({ db: 'db' }));
+vi.mock('../../firebase', () => ({ db: 'db' }));
 
 const { getProgress, saveProgress } = await import('./progressService');
 

@@ -8,7 +8,7 @@ const authMethods = {
 };
 
 vi.mock('firebase/auth', () => ({ ...authMethods, getAuth: vi.fn(() => ({})), onAuthStateChanged: vi.fn() }));
-vi.mock('../firebase', () => ({ auth: { currentUser: null } }));
+vi.mock('../../firebase', () => ({ auth: { currentUser: null } }));
 
 const { createAccount, loginAccount, logoutAccount, updateAccountProfile } = await import('./authService');
 
@@ -31,6 +31,11 @@ describe('Firebase Auth service', () => {
     await expect(loginAccount('dicky@example.com', 'rahasia')).resolves.toBe(user);
     await expect(logoutAccount()).resolves.toBeUndefined();
     expect(authMethods.signOut).toHaveBeenCalled();
+  });
+
+  test('explains invalid Firebase credentials', async () => {
+    authMethods.signInWithEmailAndPassword.mockRejectedValueOnce({ code: 'auth/invalid-credential' });
+    await expect(loginAccount('dicky@example.com', 'salah')).rejects.toThrow('Email atau kata sandi salah');
   });
 
   test('updates Firebase display name', async () => {

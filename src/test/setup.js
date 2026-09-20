@@ -28,7 +28,7 @@ vi.mock('firebase/auth', () => ({
   }),
 }));
 
-vi.mock('../services/orderService', () => import('./orderServiceMock'));
+vi.mock('../services/api/orderService', () => import('./orderServiceMock'));
 beforeEach(resetOrderServiceMock);
 beforeEach(() => { authState.currentUser = null; authState.listeners = []; });
 

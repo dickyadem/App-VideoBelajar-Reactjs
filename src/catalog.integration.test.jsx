@@ -5,10 +5,10 @@ import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { readMockOrders } from './test/orderServiceMock';
 
-vi.mock('./services/catalogService', () => ({ getCatalog: vi.fn() }));
+vi.mock('./services/api/catalogService', () => ({ getCatalog: vi.fn() }));
 vi.mock('./firebase', () => ({ db: {} }));
 vi.mock('firebase/firestore', () => ({ doc: vi.fn(), serverTimestamp: vi.fn(), setDoc: vi.fn().mockResolvedValue() }));
-import { getCatalog } from './services/catalogService';
+import { getCatalog } from './services/api/catalogService';
 
 const course = { id: 'remote', slug: 'remote', title: 'Kelas Baru Firestore', category: 'science', description: 'Deskripsi dari database', instructorName: 'Tutor Baru', instructorRole: 'Pengajar', image: '/remote.webp', instructorImage: '/tutor.webp', priceAmount: 125000, price: 'Rp 125.000', rating: '4.8 (12)' };
 const catalog = {
