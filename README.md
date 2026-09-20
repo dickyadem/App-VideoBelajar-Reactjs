@@ -52,50 +52,46 @@ Pesanan disimpan di koleksi `orders` Firestore melalui `orderService` dan `Order
 
 ## Flow aplikasi
 
-Diagram alur utama aplikasi:
+Diagram alur autentikasi:
 
 ```mermaid
 flowchart TD
-	A[Pengunjung membuka aplikasi] --> B{Sudah login?}
-	B -- Tidak --> C[Beranda / Katalog / Detail Kelas]
-	C --> D{Ingin membeli kelas?}
-	D -- Tidak --> C
-	D -- Ya --> E[Login / Register]
-	B -- Ya --> F[Beranda / Katalog / Detail Kelas]
-	E --> G[Firebase Authentication]
-	G --> H{Login berhasil?}
-	H -- Tidak --> I[Tampilkan pesan error]
-	I --> E
-	H -- Ya --> F
-	F --> J[Klik Beli Sekarang]
-	J --> K[Pilih Metode Pembayaran]
-	K --> L{Metode dipilih?}
-	L -- Tidak --> K
-	L -- Ya --> M[Klik Beli Sekarang]
-	M --> N[Buat order Firestore<br/>status: Belum Bayar]
-	N --> O[Halaman Pembayaran]
-	O --> P[Klik Bayar Sekarang]
-	P --> Q[Update order<br/>status: Berhasil]
-	Q --> R[Pembayaran Berhasil]
-	R --> S[Pesanan Saya / Kelas Saya]
-	S --> T{Order belum dibayar?}
-	T -- Tidak --> S
-	T -- Ya --> U[Klik Ubah Metode]
-	U --> V[Ubah Metode Pembayaran]
-	V --> W[Pilih metode baru]
-	W --> X[Klik Bayar Sekarang]
-	X --> Y[Update metode + status<br/>dalam order yang sama]
-	Y --> R
-	S --> Z[Mulai Belajar]
-	Z --> AA[Pre-Test]
-	AA --> AB[Video Pembelajaran]
-	AB --> AC[Rangkuman]
-	AC --> AD[Quiz]
-	AD --> AE[Ujian Akhir]
-	AE --> AF{Semua materi selesai?}
-	AF -- Tidak --> Z
-	AF -- Ya --> AG[Ambil Sertifikat]
-	AG --> AH[Download Sertifikat]
+	A[Pengunjung] --> B{Sudah login?}
+	B -- Tidak --> C[Login atau Register]
+	B -- Ya --> D[Masuk ke aplikasi]
+	C --> E[Firebase Authentication]
+	E --> F{Berhasil?}
+	F -- Tidak --> C
+	F -- Ya --> D
+```
+
+Diagram alur pembelian:
+
+```mermaid
+flowchart TD
+	A[Detail Kelas] --> B[Pilih Metode Pembayaran]
+	B --> C[Klik Beli Sekarang]
+	C --> D[Order Firestore: Belum Bayar]
+	D --> E[Halaman Pembayaran]
+	E --> F[Klik Bayar Sekarang]
+	F --> G[Order: Berhasil]
+	G --> H[Pembayaran Berhasil]
+	H --> I[Pesanan Saya dan Kelas Saya]
+```
+
+Diagram alur pembelajaran:
+
+```mermaid
+flowchart TD
+	A[Kelas Saya] --> B[Pre-Test]
+	B --> C[Video Pembelajaran]
+	C --> D[Rangkuman]
+	D --> E[Quiz]
+	E --> F[Ujian Akhir]
+	F --> G{Semua materi selesai?}
+	G -- Tidak --> C
+	G -- Ya --> H[Ambil Sertifikat]
+	H --> I[Download Sertifikat]
 ```
 
 Flow khusus **Ubah Metode Pembayaran**:
