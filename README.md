@@ -13,7 +13,7 @@ Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Mencakup katalog
 - Vite 8 dan plugin React untuk development server dan build.
 - CSS untuk styling dan layout responsif.
 - Firebase Authentication untuk login/register dan UID yang konsisten lintas device; Context API mengelola state user, sementara `localStorage` hanya cache profil browser.
-- Axios untuk contoh konsumsi API CRUD melalui `src/services/api/`; Firebase SDK tetap digunakan sebagai sumber data utama aplikasi.
+- Axios untuk konsumsi API CRUD melalui `src/services/api/` dan upload foto profil ke Cloudinary; Firebase SDK tetap digunakan sebagai sumber data utama aplikasi.
 - Vitest, React Testing Library, jest-dom, dan jsdom untuk pengujian.
 
 ## Fitur
@@ -25,11 +25,11 @@ Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Mencakup katalog
 - **Update:** **Ubah Metode** memperbarui pesanan yang sama; **Bayar Sekarang** pada halaman pembayaran mengubah status menjadi **Berhasil** (simulasi).
 - **Delete:** pesanan belum dibayar dapat dihapus melalui **Hapus Pesanan → Ya, Hapus**. **Batal** mempertahankan pesanan.
 
-Pesanan disimpan di koleksi `orders` Firestore melalui `orderService` dan `OrdersContext`. UI menunggu konfirmasi server sebelum menampilkan sukses. Gagal menulis mempertahankan form atau konfirmasi hapus agar bisa dicoba kembali; gagal membaca menampilkan tombol muat ulang. Identitas demo tetap sama lintas logout/login pada browser ini, tetapi bukan autentikasi lintas perangkat.
+Pesanan disimpan di koleksi `orders` Firestore melalui `orderService` dan `OrdersContext`. UI menunggu konfirmasi server sebelum menampilkan sukses. Gagal menulis mempertahankan form atau konfirmasi hapus agar bisa dicoba kembali; gagal membaca menampilkan tombol muat ulang. Kepemilikan pesanan memakai UID Firebase sehingga akun yang sama dapat memuatnya lintas device.
 
 ### Fitur lainnya
 
-- **Kelas Saya** menampilkan kelas dari pesanan berstatus Berhasil, tanpa duplikasi. Persentase dan status selesai mengikuti progres belajar lokal; jumlah modul serta durasi video dihitung dari kurikulum. Kelas selesai menyediakan tautan ke halaman sertifikat.
+- **Kelas Saya** menampilkan kelas dari pesanan berstatus Berhasil, tanpa duplikasi. Persentase dan status selesai mengikuti progres yang tersimpan di Firestore berdasarkan UID Firebase; jumlah modul serta durasi video dihitung dari kurikulum. Kelas selesai menyediakan tautan ke halaman sertifikat.
 
 - Beranda responsif dengan hero, koleksi kelas, filter kategori, newsletter, dan footer.
 - Katalog dengan pencarian berdasarkan judul, deskripsi, atau nama instruktur; filter kategori dan bidang studi; serta pilihan pengurutan harga.
@@ -38,12 +38,12 @@ Pesanan disimpan di koleksi `orders` Firestore melalui `orderService` dan `Order
 - Kartu kelas dapat diklik untuk membuka detail. Tombol Bagikan Kelas menyalin tautan, dengan pilihan salin manual jika clipboard tidak tersedia.
 - Checkout responsif dengan pilihan bank, e-wallet, dan kartu; accordion metode; ringkasan pesanan; serta tahapan Pilih Metode → Bayar → Selesai dalam simulasi lokal.
 - Form Login dan Register dengan validasi HTML native, konfirmasi kata sandi, dan tombol tampil/sembunyikan kata sandi.
-- Login simulasi mengarahkan pengguna ke Beranda. Registrasi menampilkan pesan berhasil pada halaman Login tanpa otomatis masuk.
+- Login dan register email/password menggunakan Firebase Authentication. Registrasi mengarahkan pengguna ke halaman Login tanpa otomatis masuk.
 - Header dengan inisial pengguna, tombol keluar, dan menu navigasi mobile.
-- Status login bertahan setelah halaman dimuat ulang melalui `localStorage`.
+- Status login dipulihkan Firebase Authentication setelah halaman dimuat ulang.
 - Halaman profil, pesanan, dan kelas saya.
 - Halaman belajar dimulai dari Pre-Test, dilanjutkan video, rangkuman, Quiz, dan Ujian Akhir. Tombol sebelumnya/berikutnya mengikuti urutan daftar.
-- Progres dinamis dan centang hijau untuk materi selesai, tersimpan per nama akun dan slug kelas di browser.
+- Progres dinamis dan centang hijau untuk materi selesai, tersimpan di Firestore berdasarkan UID Firebase dan slug kelas; `localStorage` hanya fallback/cache.
 - Pre-Test, Quiz, dan Ujian Akhir dengan daftar soal, pilihan jawaban, konfirmasi pengumpulan, hasil nilai, serta tombol ulangi yang kembali ke aturan submodul terkait.
 - Download rangkuman `.txt` berisi deskripsi kelas dan daftar materi.
 - Modal **Beri Review & Rating** dengan pilihan 1–5 bintang, teks review, pembatalan, dan penyimpanan lokal.
@@ -62,7 +62,7 @@ Progres belajar disimpan ke Firestore berdasarkan UID Firebase dan slug kelas, s
 
 ## Menjalankan secara lokal
 
-Salin `.env.example` menjadi `.env.local`, lalu isi keenam variabel `VITE_FIREBASE_*` dari Firebase Console > Project settings > Your apps. Aktifkan provider **Email/Password** di Firebase Authentication. File `.env.local` diabaikan Git. Restart development server setelah mengubah nilainya.
+Salin `.env.example` menjadi `.env.local`, lalu isi variabel `VITE_FIREBASE_*` dari Firebase Console > Project settings > Your apps. Aktifkan provider **Email/Password** di Firebase Authentication. Isi `VITE_CLOUDINARY_CLOUD_NAME` dan `VITE_CLOUDINARY_UPLOAD_PRESET` dari Cloudinary untuk upload foto profil. Gunakan upload preset mode **Unsigned**; jangan masukkan API Secret ke frontend. File `.env.local` diabaikan Git. Restart development server setelah mengubah nilainya.
 
 Untuk Vercel, tambahkan variabel dengan nama dan nilai yang sama melalui **Settings > Environment Variables** pada environment deployment yang digunakan, lalu deploy ulang. Konfigurasi `vercel.json` sudah mengatur build Vite dengan base `/` dan output `dist`.
 
@@ -101,7 +101,7 @@ Di PowerShell, jika `npm.ps1` diblokir execution policy, gunakan `npm.cmd` sebag
 | `/login` | Form masuk |
 | `/register` | Form pendaftaran |
 
-Halaman pembayaran, profil, pesanan, kelas saya, belajar, ujian, dan sertifikat memerlukan login simulasi.
+Halaman pembayaran, profil, pesanan, kelas saya, belajar, ujian, dan sertifikat memerlukan login Firebase.
 
 ## Menguji alur belajar sampai sertifikat
 
@@ -119,7 +119,7 @@ Tombol **Ulangi** kembali ke aturan Pre-Test/Quiz/Ujian Akhir yang sesuai. Memul
 
 Untuk menguji review, klik **Beri Review & Rating**, pilih bintang dan isi review, lalu klik **Selesai**. Buka kembali untuk memeriksa hasil tersimpan. **Batal** membuang perubahan yang belum disimpan.
 
-Untuk mengulang progres dari nol, hapus key `videobelajar-progress:<nama>:<slug>` melalui DevTools → Application → Local Storage, lalu refresh. Review memakai key `videobelajar-review:<nama>:<slug>` dan status login memakai `videobelajar-user`.
+Untuk mengulang progres dari nol, hapus dokumen `users/{uid}/progress/{courseSlug}` dari Firestore. `localStorage` hanya menyimpan fallback/cache progres. Review masih memakai key `videobelajar-review:<nama>:<slug>` di browser.
 
 ## Pengujian dan build
 
@@ -161,7 +161,9 @@ videobelajar/
 │   ├── App.jsx           # Definisi route aplikasi
 │   ├── App.test.jsx      # Pengujian aplikasi
 │   ├── components/       # Header, Footer, CourseProgress, ReviewButton, form, dll.
-│   ├── context/          # AuthContext dan pengujiannya
+│   ├── context/          # AuthContext, CatalogContext, OrdersContext
+│   ├── hooks/             # Hook async resource dan progres belajar
+│   ├── services/          # Service Firebase, Axios, Cloudinary, dan profil
 │   ├── data/             # Data kelas dan pengujiannya
 │   ├── pages/            # Katalog, checkout, belajar, Quiz, Certificate, dan pengujian
 │   └── test/setup.js     # Setup lingkungan pengujian
@@ -198,9 +200,9 @@ Semua kelas menggunakan satu template `src/pages/CourseDetailPage.jsx` dengan st
 ## Batas keamanan dan integrasi
 
 - `VITE_FIREBASE_*` adalah konfigurasi SDK client yang terlihat di bundle browser. `.env` memisahkan konfigurasi, bukan menyembunyikan kredensial dari pengguna.
-- Login masih simulasi lokal. UID dari browser, pengecekan pemilik di service, dan route guard bukan otorisasi server. Security Rules yang diterapkan di Firebase belum diaudit oleh perubahan ini.
+- Firebase Authentication menyediakan UID lintas device. Route guard dan validasi pemilik di client bukan pengganti Security Rules; rules Firebase tetap harus membatasi akses berdasarkan `request.auth.uid`.
 - Sebelum memakai data pribadi/transaksi nyata, integrasikan Firebase Authentication dan verifikasi kepemilikan menggunakan `request.auth.uid` di Security Rules. Harga dan status pembayaran nyata harus ditentukan oleh backend/payment provider tepercaya.
-- Service profil hanya mengirim UID, nama, email, nomor HP, role demo, dan timestamp. Password, foto base64, dan daftar pesanan tidak dikirim. Foto, progres, ulasan yang ditulis pengguna, dan sertifikat masih lokal; sinkronisasi profil tidak memuat kembali profil lintas perangkat.
+- Service profil hanya mengirim UID, nama, email, nomor HP, URL foto Cloudinary, role demo, dan timestamp. Password, foto base64, dan daftar pesanan tidak dikirim. Progres belajar tersinkron di Firestore; review dan sertifikat masih lokal.
 - Jangan menaruh service-account key, token privat, atau secret backend pada variabel `VITE_*`.
 
 ## Pola async dan performa
