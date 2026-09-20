@@ -22,7 +22,7 @@
 .category-course-grid .course-image { height:148px; }
 .category-course-grid .course-body { padding:12px; }
 .category-course-grid .course-body h3 { font-size:13px; }
-.category-course-grid .course-body p { margin-bottom:12px; font-size:11px; }
+.category-course-grid .course-body p { min-height:49.5px; margin-bottom:12px; font-size:11px; line-height:1.5; -webkit-line-clamp:3; }
 .category-course-grid .instructor { gap:7px; margin-bottom:12px; }
 .category-course-grid .instructor-avatar { width:24px; height:24px; border-radius:6px; }
 .category-course-grid .instructor-name { font-size:10px; }
