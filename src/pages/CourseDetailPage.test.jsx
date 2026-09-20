@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { render } from '../test/renderWithCatalog';
+import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import App from '../App';
@@ -45,11 +46,11 @@ test('related courses exclude the current course and navigate to another detail'
   expect(screen.getByRole('heading', { level: 1, name: courses[4].title })).toBeInTheDocument();
 });
 
-test('purchase opens the payment method page first', () => {
+test('purchase opens the payment method page first', async () => {
   localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky', isLoggedIn: true }));
   open(`/course/${slugs[0]}`);
   fireEvent.click(screen.getByRole('link', { name: 'Beli Sekarang' }));
-  expect(screen.getByRole('heading', { name: 'Metode Pembayaran' })).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: 'Metode Pembayaran' })).toBeInTheDocument();
 });
 
 test('starts the next course at the top and clears previous share feedback', async () => {

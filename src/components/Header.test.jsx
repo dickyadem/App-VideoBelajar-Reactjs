@@ -35,6 +35,15 @@ test('shows initials and logout action to a signed-in user', () => {
   expect(screen.queryByRole('link', { name: 'Login' })).not.toBeInTheDocument();
 });
 
+test('falls back to initials when the profile photo cannot load', () => {
+  localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky Adem', photo: 'invalid-image-url', isLoggedIn: true }));
+  renderHeader();
+  const profileButton = screen.getByRole('button', { name: 'Buka menu profil Dicky Adem' });
+  fireEvent.error(screen.getByAltText('Foto profil Dicky Adem'));
+  expect(profileButton).toHaveTextContent('DA');
+  expect(screen.queryByAltText('Foto profil Dicky Adem')).not.toBeInTheDocument();
+});
+
 test('logout restores guest actions', () => {
   localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky', isLoggedIn: true }));
   renderHeader();

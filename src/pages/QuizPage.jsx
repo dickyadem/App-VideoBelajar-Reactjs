@@ -8,8 +8,8 @@ import { useAuth } from '../context/AuthContext';
 import CourseProgress, { ModuleIcon, useCourseProgress } from '../components/CourseProgress';
 import ReviewButton from '../components/ReviewButton';
 import Footer from '../components/Footer';
-import { courses } from '../data/courses';
-import { courseDetails } from '../data/courseDetails';
+import { useCatalog } from '../context/CatalogContext';
+
 import '../../assets/css/quiz.css';
 
 const questions = Array.from({ length: 10 }, (_, index) => ({
@@ -25,6 +25,7 @@ function Modules({ detail, assessmentTitle, assessment, progress }) {
 }
 
 export default function QuizPage() {
+  const { courses, courseDetails } = useCatalog();
   const { slug } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();

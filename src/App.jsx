@@ -1,5 +1,5 @@
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import HomePage from './pages/HomePage';
 import CategoryPage from './pages/CategoryPage';
 import LoginPage from './pages/LoginPage';
@@ -11,9 +11,13 @@ import RequireAuth from './components/RequireAuth';
 import OrdersPage from './pages/OrdersPage';
 import ClassesPage from './pages/ClassesPage';
 import ProfilePage from './pages/ProfilePage';
-import LearningPage from './pages/LearningPage';
-import QuizPage from './pages/QuizPage';
-import CertificatePage from './pages/CertificatePage';
+import PageBoundary from './components/PageBoundary';
+import CatalogLayout from './components/CatalogLayout';
+import OrdersLayout from './components/OrdersLayout';
+
+const LearningPage = lazy(() => import('./pages/LearningPage'));
+const QuizPage = lazy(() => import('./pages/QuizPage'));
+const CertificatePage = lazy(() => import('./pages/CertificatePage'));
 
 function ProfileLinkRedirect() {
   const navigate = useNavigate();
@@ -32,22 +36,28 @@ function ProfileLinkRedirect() {
 
 export default function App() {
   return (
-    <><ProfileLinkRedirect /><Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/category" element={<CategoryPage />} />
-      <Route path="/course/:slug" element={<CourseDetailPage />} />
-      <Route path="/course/:slug/certificate" element={<RequireAuth><CertificatePage /></RequireAuth>} />
-      <Route path="/course/:slug/payment" element={<RequireAuth><PaymentMethodPage /></RequireAuth>} />
-      <Route path="/course/:slug/pay" element={<RequireAuth><PaymentPage /></RequireAuth>} />
-      <Route path="/orders" element={<RequireAuth><OrdersPage /></RequireAuth>} />
-      <Route path="/classes" element={<RequireAuth><ClassesPage /></RequireAuth>} />
+    <><ProfileLinkRedirect /><PageBoundary><Suspense fallback={<main className="container section"><p role="status">Memuat halaman...</p></main>}><Routes>
+      <Route element={<CatalogLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/category" element={<CategoryPage />} />
+        <Route path="/course/:slug" element={<CourseDetailPage />} />
+      </Route>
+      <Route element={<RequireAuth><CatalogLayout /></RequireAuth>}>
+        <Route path="/course/:slug/certificate" element={<CertificatePage />} />
+        <Route element={<OrdersLayout />}>
+          <Route path="/course/:slug/payment" element={<PaymentMethodPage />} />
+          <Route path="/course/:slug/pay" element={<PaymentPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/classes" element={<ClassesPage />} />
+        </Route>
+        <Route path="/learn/:slug" element={<LearningPage />} />
+        <Route path="/learn/:slug/quiz" element={<QuizPage />} />
+        <Route path="/learn/:slug/pretest" element={<QuizPage />} />
+        <Route path="/learn/:slug/exam" element={<QuizPage />} />
+      </Route>
       <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
-      <Route path="/learn/:slug" element={<RequireAuth><LearningPage /></RequireAuth>} />
-      <Route path="/learn/:slug/quiz" element={<RequireAuth><QuizPage /></RequireAuth>} />
-      <Route path="/learn/:slug/pretest" element={<RequireAuth><QuizPage /></RequireAuth>} />
-      <Route path="/learn/:slug/exam" element={<RequireAuth><QuizPage /></RequireAuth>} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-    </Routes></>
+    </Routes></Suspense></PageBoundary></>
   );
 }

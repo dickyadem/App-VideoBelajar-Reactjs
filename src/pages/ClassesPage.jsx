@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { courses } from '../data/courses';
-import { courseDetails } from '../data/courseDetails';
+import { useCatalog } from '../context/CatalogContext';
+
 import { useOrders } from '../context/useOrders';
 import { useAuth } from '../context/AuthContext';
+import { getProgress } from '../services/api/progressService';
 import '../../assets/css/classes.css';
 
 const tabs = [
@@ -25,13 +26,41 @@ function ClassCard({ enrollment }) {
 }
 
 export default function ClassesPage() {
+  const { courses, courseDetails } = useCatalog();
   const { orders } = useOrders();
   const { user } = useAuth();
-  const enrollments = courses.filter((course) => orders.some((order) => order.slug === course.slug && order.status === 'Berhasil')).map((course) => {
+  const purchasedCourses = courses.filter((course) => orders.some((order) => order.slug === course.slug && order.status === 'Berhasil'));
+  const [progressByCourse, setProgressByCourse] = useState(() => {
+    const saved = {};
+    purchasedCourses.forEach((course) => {
+      try {
+        const uidKey = user?.uid ? `videobelajar-progress:${user.uid}:${course.slug}` : '';
+        const nameKey = user?.name ? `videobelajar-progress:${user.name}:${course.slug}` : '';
+        const value = JSON.parse(localStorage.getItem(uidKey) || localStorage.getItem(nameKey));
+        if (Array.isArray(value)) saved[course.slug] = value;
+      } catch {}
+    });
+    return saved;
+  });
+
+  useEffect(() => {
+    let active = true;
+    if (!user?.uid) return undefined;
+    Promise.all(purchasedCourses.map(async (course) => [course.slug, await getProgress(user.uid, course.slug)]))
+      .then((entries) => {
+        if (!active) return;
+        const next = Object.fromEntries(entries.filter(([, completed]) => Array.isArray(completed)));
+        setProgressByCourse((current) => ({ ...current, ...next }));
+        entries.forEach(([slug, completed]) => localStorage.setItem(`videobelajar-progress:${user.uid}:${slug}`, JSON.stringify(completed)));
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [user?.uid, purchasedCourses.map((course) => course.slug).join('|')]);
+
+  const enrollments = purchasedCourses.map((course) => {
     const lessons = courseDetails[course.slug].modules.flatMap((module) => module.lessons);
     const ids = ['pretest', ...lessons.map((lesson) => lesson.title), 'summary', 'quiz', 'exam'];
-    let completed = [];
-    try { const saved = JSON.parse(localStorage.getItem('videobelajar-progress:' + user.name + ':' + course.slug)); if (Array.isArray(saved)) completed = saved; } catch {} 
+    const completed = progressByCourse[course.slug] || [];
     const modules = ids.filter((id) => completed.includes(id)).length;
     return { course, modules, total: ids.length, minutes: lessons.reduce((sum, lesson) => sum + lesson.minutes, 0), progress: Math.round(modules / ids.length * 100), status: modules === ids.length ? 'Selesai' : 'Sedang Berjalan' };
   });

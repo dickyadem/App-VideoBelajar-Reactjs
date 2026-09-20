@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { render } from '../test/renderWithCatalog';
+import { waitFor, cleanup, fireEvent, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, expect, test } from 'vitest';
 import App from '../App';
@@ -11,9 +12,10 @@ const prerequisites = ['pretest', 'summary', 'quiz', ...courseDetails[slug].modu
 beforeEach(() => localStorage.setItem('videobelajar-user', JSON.stringify({ name: 'Dicky', isLoggedIn: true })));
 afterEach(() => { cleanup(); localStorage.clear(); });
 
-test.each([[true, true], [true, false], [false, true]])('certificate needs all modules (%s) and a passing exam (%s)', (allModules, passed) => {
+test.each([[true, true], [true, false], [false, true]])('certificate needs all modules (%s) and a passing exam (%s)', async (allModules, passed) => {
   localStorage.setItem(key, JSON.stringify(allModules ? prerequisites : ['pretest']));
   render(<MemoryRouter initialEntries={[`/learn/${slug}/exam`]}><AuthProvider><App /></AuthProvider></MemoryRouter>);
+  await waitFor(() => expect(screen.queryByText('Memuat halaman...')).not.toBeInTheDocument());
   if (passed) for (let index = 1; index <= 10; index++) {
     fireEvent.click(screen.getByRole('button', { name: String(index) }));
     fireEvent.click(screen.getAllByRole('radio')[0]);

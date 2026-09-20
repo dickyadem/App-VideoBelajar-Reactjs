@@ -4,34 +4,48 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PaymentMethods from '../components/PaymentMethods';
-import { courses } from '../data/courses';
-import { courseDetails } from '../data/courseDetails';
+import { useCatalog } from '../context/CatalogContext';
+
 import { ADMIN_FEE, formatRupiah } from '../data/paymentMethods';
 import '../../assets/css/payment-method.css';
 
 function Checkout({ course, detail }) {
   const [selectedPayment, setSelectedPayment] = useState('');
   const content = useRef(null);
+  const mounted = useRef(true);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { orders, createOrder, updateOrder } = useOrders();
+  const { orders, createOrder, updateOrder, pending } = useOrders();
   const [error, setError] = useState('');
-  const submitOrder = () => {
+  const submitOrder = async () => {
+    setError('');
     try {
       const existing = orders.find((item) => item.id === searchParams.get('order') && item.slug === course.slug);
       let id;
-      if (searchParams.has('order')) { if (!existing) throw new Error('Pesanan tidak ditemukan.'); updateOrder(existing.id, { method: selectedPayment }); id = existing.id; }
-      else id = createOrder(course, selectedPayment);
-      navigate('/course/' + course.slug + '/pay?order=' + id + '&method=' + selectedPayment);
-    } catch { setError('Pesanan belum tersimpan. Periksa pesanan atau penyimpanan browser.'); }
+      if (searchParams.has('order')) { if (!existing) throw new Error('Pesanan tidak ditemukan.'); await updateOrder(existing.id, isChangingMethod ? { method: selectedPayment, status: 'Berhasil' } : { method: selectedPayment }); id = existing.id; }
+      else id = await createOrder(course, selectedPayment);
+      if (mounted.current) navigate(`/course/${course.slug}/pay?order=${id}&method=${selectedPayment}${isChangingMethod ? '&status=success' : ''}`, { state: { orderMessage: 'Pesanan berhasil disimpan.' } });
+    } catch { if (mounted.current) setError('Pesanan belum tersimpan. Periksa koneksi lalu coba lagi.'); }
   };
   const isChangingMethod = searchParams.get('change') === '1';
   const total = course.priceAmount + ADMIN_FEE;
   const videoCount = detail.modules.reduce((count, module) => count + module.lessons.length, 0);
 
   useEffect(() => {
+    mounted.current = true;
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    return () => { mounted.current = false; };
   }, []);
+
+  const completedOrder = !isChangingMethod && orders.some((item) => item.slug === course.slug && item.status === 'Berhasil');
+  if (completedOrder) return <div className="checkout-page">
+    <header className="checkout-header">
+      <div className="checkout-desktop-logo"><Link className="logo" to="/" aria-label="videobelajar Beranda"><img src={`${import.meta.env.BASE_URL}assets/images/logo.png`} alt="videobelajar" /></Link></div>
+      <div className="checkout-mobile-header"><Header /></div>
+    </header>
+    <main className="container checkout-not-found"><h1>Kelas Sudah Dibeli</h1><p>Kelas ini sudah berhasil dibeli dan tersedia di Kelas Saya.</p><Link className="btn btn-primary" to="/classes">Buka Kelas Saya</Link></main>
+    <Footer />
+  </div>;
 
   return <div className="checkout-page">
     <header className="checkout-header">
@@ -69,8 +83,9 @@ function Checkout({ course, detail }) {
         </section>
         <section className="checkout-panel change-method-card" aria-labelledby="payment-method-title">
           <h1 id="payment-method-title">{isChangingMethod ? 'Ubah Metode Pembayaran' : 'Metode Pembayaran'}</h1>
-          <p role="alert">{error}</p><PaymentMethods selectedPayment={selectedPayment} onChange={setSelectedPayment} />
-          <button className="btn btn-primary checkout-action" type="button" disabled={!selectedPayment} onClick={submitOrder}>{isChangingMethod ? 'Bayar Sekarang' : 'Beli Sekarang'}</button>
+          <p role="alert">{error}</p><PaymentMethods selectedPayment={selectedPayment} onChange={setSelectedPayment} disabled={pending} />
+          {pending && <p role="status">Menyimpan pesanan...</p>}
+          <button className="btn btn-primary checkout-action" type="button" disabled={!selectedPayment || pending} onClick={submitOrder}>{isChangingMethod ? 'Bayar Sekarang' : 'Beli Sekarang'}</button>
         </section>
       </section>
 
@@ -80,6 +95,7 @@ function Checkout({ course, detail }) {
 }
 
 export default function PaymentMethodPage() {
+  const { courses, courseDetails } = useCatalog();
   const { slug } = useParams();
   const course = courses.find((item) => item.slug === slug);
   const detail = course && courseDetails[course.slug];

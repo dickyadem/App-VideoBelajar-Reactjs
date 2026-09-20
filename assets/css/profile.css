@@ -5,6 +5,7 @@
 .profile-nav-item { display: flex; gap: 12px; align-items: center; padding: 12px 14px; color: #b0b0b8; font-size: 14px; font-weight: 700; }
 .profile-nav-item.is-active { margin: 0; padding: 12px 14px; color: var(--accent); background: #fff6df; border: 1px solid #ffbd35; border-radius: 3px; }
 .profile-card { padding: 20px; background: white; border: 1px solid var(--line); border-radius: 8px; }
+.profile-heading + p { display: none; }
 .profile-heading { display: flex; align-items: center; gap: 14px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
 .profile-avatar { display: grid; place-items: center; width: 74px; height: 74px; color: var(--primary-dark); background: #d1fae5; border-radius: 5px; font-size: 22px; font-weight: 800; }
 .profile-heading h2 { margin: 0; font-size: 20px; }

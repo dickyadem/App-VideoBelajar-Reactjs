@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { render } from './test/renderWithCatalog';
+import { screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { expect, test } from 'vitest';
 import App from './App';

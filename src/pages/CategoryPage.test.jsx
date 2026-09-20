@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { render } from '../test/renderWithCatalog';
+import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, test } from 'vitest';
 import CategoryPage from './CategoryPage';

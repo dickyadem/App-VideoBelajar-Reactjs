@@ -1,20 +1,23 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import CategoryTabs from '../components/CategoryTabs';
 import CourseCard from '../components/CourseCard';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
-import { courses } from '../data/courses';
-import { courseDetails } from '../data/courseDetails';
+import { useCatalog } from '../context/CatalogContext';
+
 
 const PAGE_SIZE = 4;
-const filters = [
-  ['Bidang Studi', ['Pemasaran', 'Digital & Teknologi', 'Pengembangan Diri', 'Bisnis Manajemen']],
+const extraFilters = [
   ['Harga', ['Di bawah Rp 200K', 'Rp 200K - 300K', 'Di atas Rp 300K']],
   ['Durasi', ['Kurang dari 4 Jam', '4 - 8 Jam', 'Lebih dari 8 Jam']],
 ];
-const studyCategories = { Pemasaran: 'marketing', 'Digital & Teknologi': 'design', 'Pengembangan Diri': 'personal', 'Bisnis Manajemen': 'business' };
 
 export default function CategoryPage() {
+  const { courses, courseDetails, categories } = useCatalog();
+  const studyOptions = categories.map(([slug, label]) => [slug, slug === 'design' ? 'Digital & Teknologi' : slug === 'business' ? 'Bisnis Manajemen' : label]);
+  const categoryOptions = [['all', 'Semua Kelas'], ...studyOptions];
+  const studyCategories = Object.fromEntries(studyOptions.map(([slug, label]) => [label, slug]));
+  const filters = [['Bidang Studi', studyOptions.map(([, label]) => label)], ...extraFilters];
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('default');
   const [category, setCategory] = useState('all');
@@ -37,9 +40,9 @@ export default function CategoryPage() {
       const matchesQuery = `${course.title} ${course.description} ${course.instructorName}`.toLowerCase().includes(query.toLowerCase());
       return matchesCategory && matchesStudy && matchesPrice && matchesDuration && matchesQuery;
     });
-    if (sort === 'price') return [...filtered].sort((first, second) => first.price.localeCompare(second.price));
+    if (sort === 'price') return [...filtered].sort((first, second) => first.priceAmount - second.priceAmount);
     return filtered;
-  }, [category, query, selectedStudies, selectedPrice, selectedDuration, sort]);
+  }, [courses, courseDetails, category, query, selectedStudies, selectedPrice, selectedDuration, sort]);
 
   const pageCount = Math.ceil(visibleCourses.length / PAGE_SIZE);
   const pageCourses = visibleCourses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -88,10 +91,7 @@ export default function CategoryPage() {
               <span aria-hidden="true">⌕</span>
             </label>
           </div>
-          <CategoryTabs categories={[
-            ['all', 'Semua Kelas'], ['marketing', 'Pemasaran'], ['design', 'Digital & Teknologi'],
-            ['personal', 'Pengembangan Diri'], ['business', 'Bisnis Manajemen'],
-          ]} selectedCategory={category} onChange={(value) => { setCategory(value); setPage(1); }} />
+          <CategoryTabs categories={categoryOptions} selectedCategory={category} onChange={(value) => { setCategory(value); setPage(1); }} />
           <div className="category-course-grid">
             {pageCourses.map((course) => <CourseCard key={course.slug} course={course} />)}
           </div>

@@ -2,8 +2,8 @@ import { Link, useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useCourseProgress } from '../components/CourseProgress';
-import { courses } from '../data/courses';
-import { courseDetails } from '../data/courseDetails';
+import { useCatalog } from '../context/CatalogContext';
+
 import '../../assets/css/certificate.css';
 
 const escapeXml = (text) => String(text).replace(/[<>&"']/g, (character) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[character]);
@@ -21,6 +21,7 @@ function certificateImage(name, title) {
 }
 
 export default function CertificatePage() {
+  const { courses, courseDetails } = useCatalog();
   const { slug } = useParams();
   const course = courses.find((item) => item.slug === slug);
   const progress = useCourseProgress(slug, courseDetails[slug]);

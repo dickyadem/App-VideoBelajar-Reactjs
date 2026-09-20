@@ -1,6 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import '../../assets/css/course-progress.css';
 
 export function ModuleIcon({ completed, children }) {
@@ -9,24 +8,7 @@ export function ModuleIcon({ completed, children }) {
     : <span aria-hidden="true">{children}</span>;
 }
 
-export function useCourseProgress(slug, detail) {
-  const { user } = useAuth();
-  const key = `videobelajar-progress:${user?.name}:${slug}`;
-  const ids = ['pretest', ...(detail?.modules.flatMap((module) => module.lessons.map((lesson) => lesson.title)) || []), 'summary', 'quiz', 'exam'];
-  const [completed, setCompleted] = useState(() => {
-    try { const saved = JSON.parse(localStorage.getItem(key)); return Array.isArray(saved) ? saved : []; } catch { return []; }
-  });
-  const [error, setError] = useState('');
-  const count = ids.filter((id) => completed.includes(id)).length;
-  function markComplete(id) {
-    if (!ids.includes(id) || completed.includes(id)) return;
-    const updated = [...completed, id];
-    setCompleted(updated);
-    try { localStorage.setItem(key, JSON.stringify(updated)); setError(''); }
-    catch { setError('Progres belum tersimpan di browser.'); }
-  }
-  return { count, total: ids.length, complete: count === ids.length, completed, markComplete, error, name: user?.name || 'Peserta' };
-}
+export { useCourseProgress } from '../hooks/useCourseProgress';
 
 export default function CourseProgress({ progress, course }) {
   const [open, setOpen] = useState(progress.complete);

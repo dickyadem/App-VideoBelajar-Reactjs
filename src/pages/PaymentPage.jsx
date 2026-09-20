@@ -1,13 +1,13 @@
 import { useOrders } from '../context/useOrders';
 import paymentSuccessImage from '../../assets/images/information-image/pembayaranSukses.webp';
 import paymentPendingImage from '../../assets/images/information-image/pembayaranTertunda.webp';
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { courses } from '../data/courses';
-import { courseDetails } from '../data/courseDetails';
-import { ADMIN_FEE, formatRupiah, paymentGroups, paymentLogos } from '../data/paymentMethods';
+import { useCatalog } from '../context/CatalogContext';
+
+import { ADMIN_FEE, formatRupiah, paymentLogos } from '../data/paymentMethods';
 import '../../assets/css/payment-page.css';
 
 const instructions = [
@@ -53,39 +53,71 @@ function PaymentResult({ course, status }) {
 }
 
 function PaymentPageContent({ course, detail, method, initialStatus = '' }) {
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
   const navigate = useNavigate();
+  const { state } = useLocation();
   const [params] = useSearchParams();
-  const { orders, createOrder, updateOrder } = useOrders();
+  const { orders, createOrder, updateOrder, pending } = useOrders();
   const order = orders.find((item) => item.id === params.get('order') && item.slug === course.slug);
   const [error, setError] = useState('');
-  const pay = () => {
+  const pay = async () => {
+    setError('');
     try {
       if (!order) {
         if (params.has('order')) throw new Error('Pesanan tidak ditemukan.');
-        const id = createOrder(course, method.id, 'Berhasil');
-        navigate('/course/' + course.slug + '/pay?order=' + id + '&method=' + method.id);
+        const id = await createOrder(course, method.id, 'Berhasil');
+        if (mounted.current) {
+          setResultStatus('success');
+          navigate(`/course/${course.slug}/pay?order=${id}&method=${method.id}&status=success`, { replace: true });
+        }
         return;
       }
-      updateOrder(order.id, { status: 'Berhasil' });
-      setResultStatus('success');
-    } catch { setError('Pembayaran belum diproses. Periksa pesanan atau penyimpanan browser.'); }
+      await updateOrder(order.id, { status: 'Berhasil' });
+      if (mounted.current) {
+        setResultStatus('success');
+        navigate(`/course/${course.slug}/pay?order=${order.id}&method=${method.id}&status=success`, { replace: true });
+      }
+    } catch (paymentError) { if (mounted.current) setError(paymentError?.message || 'Pembayaran belum diproses. Periksa koneksi lalu coba lagi.'); }
   };
   const [resultStatus, setResultStatus] = useState(initialStatus);
   const complete = order?.status === 'Berhasil' || Boolean(resultStatus);
   const [copied, setCopied] = useState(false);
   const total = course.priceAmount + ADMIN_FEE;
   const virtualAccount = '11739081234567890';
-  const copyAccount = async () => { try { await navigator.clipboard.writeText(virtualAccount); } catch {} setCopied(true); };
-  return <div className="payment-page"><header className="payment-header"><Link className="logo" to="/" aria-label="videobelajar Beranda"><img src={`${import.meta.env.BASE_URL}assets/images/logo.png`} alt="videobelajar" /></Link><div className="payment-header-mobile"><Header /></div><div className="payment-stepper-desktop"><Stepper complete={complete} /></div></header>{!complete && <Countdown />}<div className="payment-stepper-mobile"><Stepper complete={complete} /></div><main className="payment-container container">{complete ? <PaymentResult course={course} status={order?.status === 'Berhasil' ? 'success' : resultStatus} /> : <div className="payment-layout"><section><div className="payment-main-card"><h1 className="payment-title">Pembayaran</h1><div className="virtual-account-box"><div className="payment-provider-logos">{(method.brands || [method.id]).map((brand) => <img key={brand} src={paymentLogos[brand.toLowerCase()]} alt={method.brands ? brand : method.name} />)}</div><p className="payment-method-label">Bayar Melalui Virtual Account <strong>{method.name}</strong></p><div className="virtual-account-number"><span>{virtualAccount}</span><button className="copy-button" type="button" onClick={copyAccount}>{copied ? 'Tersalin' : 'Salin'}</button></div></div><section className="order-summary" aria-labelledby="order-title"><h2 id="order-title">Ringkasan Pesanan</h2><div className="order-row"><span className="order-label">Video Learning: {course.title}</span><span className="order-price">{formatRupiah(course.priceAmount)}</span></div><div className="order-row"><span className="order-label">Biaya Admin</span><span className="order-price">{formatRupiah(ADMIN_FEE)}</span></div><div className="order-total"><span>Total Pembayaran</span><strong className="total-value">{formatRupiah(total)}</strong></div></section><p role="alert">{error}</p><div className="payment-actions"><button className="btn-change-payment" type="button" onClick={() => navigate(`/course/${course.slug}/payment?change=1${order ? '&order=' + order.id : ''}`)}>Ganti Metode Pembayaran</button><button className="btn-pay-now" type="button" onClick={pay}>Bayar Sekarang</button></div><p className="payment-demo">Mode demo - belum ada transaksi atau akses materi.</p></div><Instructions /></section><CourseSummary course={course} detail={detail} /></div>}</main><Footer /></div>;
+  const copyAccount = async () => {
+    setCopied(false);
+    setError('');
+    try {
+      await navigator.clipboard.writeText(virtualAccount);
+      if (mounted.current) setCopied(true);
+    } catch {
+      if (mounted.current) setError('Nomor belum tersalin. Salin nomor virtual account secara manual.');
+    }
+  };
+  return <div className="payment-page"><header className="payment-header"><Link className="logo" to="/" aria-label="videobelajar Beranda"><img src={`${import.meta.env.BASE_URL}assets/images/logo.png`} alt="videobelajar" /></Link><div className="payment-header-mobile"><Header /></div><div className="payment-stepper-desktop"><Stepper complete={complete} /></div></header>{!complete && <Countdown />}<div className="payment-stepper-mobile"><Stepper complete={complete} /></div><main className="payment-container container">{complete ? <PaymentResult course={course} status={order?.status === 'Berhasil' ? 'success' : resultStatus} /> : <div className="payment-layout"><section><div className="payment-main-card"><h1 className="payment-title">Pembayaran</h1><div className="virtual-account-box"><div className="payment-provider-logos">{(method.brands || [method.id]).map((brand) => <img key={brand} src={paymentLogos[brand.toLowerCase()]} alt={method.brands ? brand : method.name} />)}</div><p className="payment-method-label">Bayar Melalui Virtual Account <strong>{method.name}</strong></p><div className="virtual-account-number"><span>{virtualAccount}</span><button className="copy-button" type="button" onClick={copyAccount}>{copied ? 'Tersalin' : 'Salin'}</button></div></div><section className="order-summary" aria-labelledby="order-title"><h2 id="order-title">Ringkasan Pesanan</h2><div className="order-row"><span className="order-label">Video Learning: {course.title}</span><span className="order-price">{formatRupiah(course.priceAmount)}</span></div><div className="order-row"><span className="order-label">Biaya Admin</span><span className="order-price">{formatRupiah(ADMIN_FEE)}</span></div><div className="order-total"><span>Total Pembayaran</span><strong className="total-value">{formatRupiah(total)}</strong></div></section><p role="alert">{error}</p>{pending ? <p role="status">Menyimpan pembayaran...</p> : state?.orderMessage && <p role="status">{state.orderMessage}</p>}<div className="payment-actions"><button className="btn-change-payment" type="button" disabled={pending} onClick={() => navigate(`/course/${course.slug}/payment?change=1${order ? '&order=' + order.id : ''}`)}>Ganti Metode Pembayaran</button><button className="btn-pay-now" type="button" disabled={pending} onClick={pay}>Bayar Sekarang</button></div><p className="payment-demo">Simulasi pembayaran - tidak ada transaksi uang nyata.</p></div><Instructions /></section><CourseSummary course={course} detail={detail} /></div>}</main><Footer /></div>;
 }
 
 export default function PaymentPage() {
+  const { courses, courseDetails, paymentGroups } = useCatalog();
+  const { orders } = useOrders();
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
   const course = courses.find((item) => item.slug === slug);
   const detail = course && courseDetails[course.slug];
-  const method = paymentGroups.flatMap((group) => group.options).find((item) => item.id === searchParams.get('method')) || paymentGroups[0].options[0];
+  const methods = paymentGroups.flatMap((group) => group.options);
+  const method = searchParams.has('method') ? methods.find((item) => item.id === searchParams.get('method')) : methods[0];
   if (!course || !detail) return <><Header /><main className="container checkout-not-found"><h1>Kelas tidak ditemukan</h1><Link className="btn btn-primary" to="/category">Jelajahi kelas</Link></main><Footer /></>;
   const status = searchParams.get('status') === 'pending' ? 'pending' : searchParams.get('status') === 'success' || searchParams.get('complete') === '1' ? 'success' : '';
-  return <PaymentPageContent key={`${slug}-${method.id}-${status}`} course={course} detail={detail} method={method} initialStatus={status} />;
+  const order = orders.find((item) => item.id === searchParams.get('order') && item.slug === slug);
+  const changeParams = searchParams.has('order') ? `?${new URLSearchParams({ change: '1', order: searchParams.get('order') })}` : '';
+  if (!method && order?.status !== 'Berhasil' && !status) return <><Header /><main className="container checkout-not-found">
+    <h1>Metode Pembayaran</h1>
+    <p role="status">{methods.length ? 'Metode pembayaran tidak tersedia. Silakan pilih metode lain.' : 'Metode pembayaran belum tersedia.'}</p>
+    <Link className="btn btn-primary" to={`/course/${slug}/payment${changeParams}`}>Pilih metode pembayaran</Link>
+  </main><Footer /></>;
+  return <PaymentPageContent key={`${slug}-${method?.id || 'unavailable'}-${status}`} course={course} detail={detail} method={method} initialStatus={status} />;
 }
