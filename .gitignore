@@ -43,6 +43,10 @@ API.md
 
 # Panduan lokal advanced project
 GUIDELINE_ADVANCE.md
+GUIDELINE_ADVANCE2.md
+
+# Bukti demo checklist, bukan fitur produk
+src/pages/ReduxDemoPage.jsx
 
 # Dokumentasi API lokal
 API.md
