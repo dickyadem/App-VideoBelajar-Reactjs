@@ -10,13 +10,25 @@ Aplikasi frontend pembelajaran video berbasis ReactJS dan Vite. Mencakup katalog
 
 - React 19 dan React DOM untuk antarmuka berbasis komponen.
 - React Router DOM 7 untuk navigasi halaman.
+- Redux Toolkit dan React Redux untuk state katalog, pemuatan data, dan CRUD kelas.
 - Vite 8 dan plugin React untuk development server dan build.
 - CSS untuk styling dan layout responsif.
 - Firebase Authentication untuk login/register dan UID yang konsisten lintas device; Context API mengelola state user, sementara `localStorage` hanya cache profil browser.
-- Axios untuk konsumsi API CRUD melalui `src/services/api/` dan upload foto profil ke Cloudinary; Firebase SDK tetap digunakan sebagai sumber data utama aplikasi.
+- Firebase SDK untuk operasi data melalui `src/services/api/`; Axios untuk upload foto profil ke Cloudinary.
 - Vitest, React Testing Library, jest-dom, dan jsdom untuk pengujian.
 
 ## Fitur
+
+### CRUD kelas dengan Redux
+
+Buka **menu profil → Kelola Kelas** setelah login, atau `/#/manage-courses`. Halaman ini mengelola kelas yang dipublikasikan di katalog.
+
+- **Create:** isi judul, kategori, harga, dan informasi tambahan, lalu klik **Tambah kelas**.
+- **Read:** daftar kelas berasal dari Firestore dan disimpan dalam state Redux.
+- **Update:** klik **Edit**, ubah informasi, lalu **Simpan perubahan**. Slug tetap saat judul berubah.
+- **Delete:** klik **Hapus**, kemudian setujui konfirmasi untuk menghapus kelas dari katalog.
+
+UI menunggu konfirmasi server sebelum memperbarui Redux. Harga tampilan dan deskripsi detail ikut diperbarui; kegagalan mempertahankan data serta input untuk dicoba kembali. Tombol dinonaktifkan selama operasi berlangsung. Hak tulis mengikuti Security Rules Firestore; login saja tidak menjamin izin pengelolaan kelas. Modul, pelajaran, ulasan, dan kategori belum dikelola melalui form ini.
 
 ### CRUD pesanan
 
@@ -111,7 +123,7 @@ Pada flow ubah metode, tidak dibuat order baru. Order yang sama diperbarui denga
 ### Autentikasi
 
 1. Pengunjung dapat membuka beranda, katalog, dan detail kelas tanpa login.
-2. Halaman yang membutuhkan akun, seperti pembayaran, pesanan, kelas saya, belajar, ujian, profil, dan sertifikat, mengarahkan pengunjung ke `/#/login`.
+2. Halaman yang membutuhkan akun, seperti kelola kelas, pembayaran, pesanan, kelas saya, belajar, ujian, profil, dan sertifikat, mengarahkan pengunjung ke `/#/login`.
 3. Pengguna baru membuka `/#/register`, mengisi nama, email, nomor HP, kata sandi, dan konfirmasi kata sandi.
 4. Firebase Authentication membuat akun, kemudian aplikasi mengarahkan pengguna ke Login. Registrasi tidak langsung membuat sesi login.
 5. Setelah login berhasil, Firebase mengirim UID melalui `onAuthStateChanged`. Profil user disimpan atau dibaca dari `users/{uid}` Firestore dan sesi dipulihkan saat halaman dimuat ulang.
@@ -157,6 +169,8 @@ Flow ini berlaku hanya untuk order berstatus **Belum Bayar**.
 ### Data katalog, profil, dan media
 
 - Katalog dan metode aktif dibaca dari Firestore saat aplikasi dimuat. Katalog lokal hanya digunakan sebagai fixture dan seed manual.
+- `CatalogProvider` menjalankan `dispatch(fetchCourses())`, lalu mengambil data dengan `useSelector`. `state.courses` berupa array dengan nilai awal `[]`; `state.catalog` menyimpan detail kelas, kategori, metode pembayaran, status pemuatan, dan error.
+- `CatalogContext` meneruskan data Redux melalui `useCatalog()` untuk halaman yang sudah ada, tanpa menyimpan salinan state katalog. Autentikasi dan pesanan tetap dikelola melalui context masing-masing.
 - Semua service pemanggilan backend berada di `src/services/api/`: `authService`, `catalogService`, `courseApi`, `orderService`, `profileService`, `progressService`, `seedService`, dan `cloudinaryService`.
 - `courseApi.js` menjadi service course Firebase dan menyediakan pembacaan katalog serta operasi CRUD course.
 - Foto profil diunggah ke Cloudinary. Jika URL foto gagal dimuat, Header dan halaman Profil menampilkan inisial user sebagai fallback.
@@ -191,7 +205,7 @@ npm ci
 npm run dev
 ```
 
-Buka alamat yang ditampilkan Vite di terminal. Aplikasi saat ini tidak memerlukan konfigurasi `.env`.
+Buka alamat yang ditampilkan Vite di terminal setelah konfigurasi `.env.local` diisi.
 
 Di PowerShell, jika `npm.ps1` diblokir execution policy, gunakan `npm.cmd` sebagai pengganti `npm`.
 
@@ -199,6 +213,7 @@ Di PowerShell, jika `npm.ps1` diblokir execution policy, gunakan `npm.cmd` sebag
 | --- | --- |
 | `/` | Beranda dan koleksi kelas |
 | `/category` | Katalog, pencarian, dan filter kelas |
+| `/manage-courses` | Kelola kelas: tambah, edit, dan hapus; memerlukan login dan izin tulis Firestore |
 | `/course/:slug` | Detail kelas, misalnya `/course/design-thinking-praktis` |
 | `/course/:slug/payment` | Pilihan metode pembayaran dan simulasi checkout untuk kelas tersebut |
 | `/course/:slug/pay` | Instruksi pembayaran dan hasil pembayaran demo |
@@ -213,7 +228,7 @@ Di PowerShell, jika `npm.ps1` diblokir execution policy, gunakan `npm.cmd` sebag
 | `/login` | Form masuk |
 | `/register` | Form pendaftaran |
 
-Halaman pembayaran, profil, pesanan, kelas saya, belajar, ujian, dan sertifikat memerlukan login Firebase.
+Halaman kelola kelas, pembayaran, profil, pesanan, kelas saya, belajar, ujian, dan sertifikat memerlukan login Firebase.
 
 ## Menguji alur belajar sampai sertifikat
 
@@ -252,6 +267,9 @@ Hasil build berada di `dist/`; folder ini tidak perlu di-commit. Jika nama repos
 # Menjalankan pengujian sekali
 npm test
 
+# Menguji integrasi Redux, CRUD kelas, dan katalog
+npm test -- src/catalog.integration.test.jsx src/store/redux/coursesReducer.test.js src/services/api/catalogService.test.js src/pages/HomePage.test.jsx src/pages/CategoryPage.test.jsx
+
 # Membuat hasil build produksi di dist/
 npm run build
 
@@ -264,6 +282,8 @@ npx vite preview
 
 Konfigurasi pengujian ada di `vite.config.js`, dengan setup di `src/test/setup.js`. File pengujian ditempatkan di dekat halaman, komponen, konteks autentikasi, dan data yang diuji.
 
+Verifikasi integrasi Redux pada 22 September 2026: 37 tes terkait lulus dan build produksi berhasil. Pengujian memakai service mock, sehingga izin serta operasi tulis Firebase live belum diverifikasi. Run suite penuh mencatat 88 tes lulus, 82 gagal, dan satu error teardown AuthContext; kegagalan tes lama terkait autentikasi/profil masih perlu ditangani. Build masih memberi peringatan ukuran chunk di atas 500 kB.
+
 ## Struktur proyek
 
 ```text
@@ -274,6 +294,7 @@ videobelajar/
 │   ├── App.test.jsx      # Pengujian aplikasi
 │   ├── components/       # Header, Footer, CourseProgress, ReviewButton, form, dll.
 │   ├── context/          # AuthContext, CatalogContext, OrdersContext
+│   ├── store/redux/      # Store, reducer array kursus, dan metadata katalog
 │   ├── hooks/             # Hook async resource dan progres belajar
 │   ├── services/api/      # Semua service pemanggilan Firebase dan Cloudinary
 │   ├── data/             # Data kelas dan pengujiannya
@@ -295,15 +316,15 @@ File HTML dan JavaScript versi lama diarsipkan dalam `legacy/` dan tidak termasu
 
 Semua kelas menggunakan satu template `src/pages/CourseDetailPage.jsx` dengan styling di `assets/css/course-detail.css`. Interaksi pembelian dan bagikan berada di `src/components/PurchaseCard.jsx`. Tidak perlu membuat halaman baru untuk setiap produk.
 
-1. Ubah informasi katalog di koleksi `courses` Firestore. Setiap kelas memiliki `slug` unik dan tetap sebagai bagian URL; pertahankan slug ketika hanya mengganti judul.
-2. Kelola konten terkait pada koleksi `modules`, `lessons`, dan `reviews` sesuai relasi yang dibaca `courseService`. File `src/data/courseDetails.js` hanya fixture/seed demo.
+1. Ubah informasi melalui **Kelola Kelas** atau koleksi `courses` Firestore. Slug tetap ketika judul diedit melalui form; kelas baru menggunakan ID dokumen sebagai slug jika belum ditentukan.
+2. Kelola konten terkait pada koleksi `modules`, `lessons`, dan `reviews` sesuai relasi yang dibaca `courseApi.js`. File `src/data/courseDetails.js` hanya fixture/seed demo.
 3. Kartu kelas otomatis menuju `/course/:slug`. Jumlah video dihitung dari daftar pelajaran dan jumlah dokumen demo mengikuti jumlah modul.
 4. Jalankan `npm test` dan `npm run build` setelah perubahan. Slug yang tidak ditemukan menampilkan tautan kembali ke katalog.
 
 ## Mengelola metode pembayaran
 
 - Harga kelas berasal dari koleksi `courses` Firestore dan dinormalisasi menjadi `priceAmount`; label harga katalog dan perhitungan checkout berasal dari nilai tersebut.
-- Metode aktif dibaca dari koleksi `paymentMethods` Firestore. Biaya admin demo dan pemetaan logo berada di `src/data/paymentMethods.js`. Pengguna harus memilih satu metode sebelum checkout.
+- Metode aktif dibaca dari koleksi `payment-methods` Firestore. Biaya admin demo dan pemetaan logo berada di `src/data/paymentMethods.js`. Pengguna harus memilih satu metode sebelum checkout.
 - `src/components/PaymentMethods.jsx` menangani pilihan dan accordion. `src/pages/PaymentMethodPage.jsx` menangani ringkasan dan tahapan simulasi, dengan styling di `assets/css/payment-method.css`.
 - Alur pembayaran memakai `PaymentMethodPage.jsx` untuk pemilihan metode dan `PaymentPage.jsx` untuk instruksi serta hasil pembayaran demo. Status pesanan tersimpan di Firestore dan dimuat kembali setelah refresh.
 - Ringkasan kelas berada di kanan pada desktop dan di atas pilihan metode pada mobile; gambar kelas disembunyikan pada mobile. Logo metode pembayaran memakai aset PNG lokal di `assets/images/`, termasuk bank, e-wallet, Mastercard, VISA, dan JCB.
@@ -319,4 +340,4 @@ Semua kelas menggunakan satu template `src/pages/CourseDetailPage.jsx` dengan st
 
 ## Pola async dan performa
 
-`src/hooks/useAsyncResource.js` menyatukan loading, pesan kegagalan, retry, dan pengabaian response lama untuk katalog/pesanan. Error mutasi tidak menggantikan error pemuatan. Status sinkronisasi profil tersedia di halaman profil. Halaman belajar, kuis, dan sertifikat memakai lazy loading dengan fallback serta error boundary; gambar kartu kelas dimuat secara lazy. Firebase tetap memuat SDK pada bundle awal, sehingga optimasi ini tidak menjamin seluruh bundle di bawah 500 kB.
+Katalog menggunakan async thunk Redux untuk pemuatan dan mutasi. Request pemuatan yang masih berjalan tidak dikirim ulang; kegagalan GET menyediakan tombol coba lagi. Error mutasi ditampilkan pada form tanpa mengganti error pemuatan. Pesanan tetap memakai `OrdersContext` dan `useAsyncResource`; status sinkronisasi profil tersedia di halaman profil. Halaman kelola kelas, belajar, kuis, dan sertifikat memakai lazy loading dengan fallback serta error boundary; gambar kartu kelas dimuat secara lazy. Firebase tetap memuat SDK pada bundle awal, sehingga optimasi ini tidak menjamin seluruh bundle di bawah 500 kB.

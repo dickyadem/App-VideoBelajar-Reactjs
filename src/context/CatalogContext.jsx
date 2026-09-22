@@ -1,14 +1,15 @@
-import { createContext, useContext } from 'react';
-import { getCatalog } from '../services/api/catalogService';
-import { useAsyncResource } from '../hooks/useAsyncResource';
+import { createContext, useContext, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCourses } from '../store/redux/coursesReducer';
 
 export const CatalogContext = createContext(null);
-const emptyCatalog = { courses: [], courseDetails: {}, categories: [], paymentGroups: [] };
 
 export function CatalogProvider({ children }) {
-  const state = useAsyncResource(getCatalog, emptyCatalog, 'Gagal memuat data kelas. Silakan coba lagi.');
-
-  return <CatalogContext.Provider value={{ ...state.data, loading: state.loading, error: state.error, reload: state.reload }}>{children}</CatalogContext.Provider>;
+  const dispatch = useDispatch();
+  const courses = useSelector((state) => state.courses);
+  const catalog = useSelector((state) => state.catalog);
+  useEffect(() => { dispatch(fetchCourses()); }, [dispatch]);
+  return <CatalogContext.Provider value={{ ...catalog, courses, loading: ['idle', 'loading'].includes(catalog.status), reload: () => dispatch(fetchCourses()) }}>{children}</CatalogContext.Provider>;
 }
 
 export function useCatalog() {

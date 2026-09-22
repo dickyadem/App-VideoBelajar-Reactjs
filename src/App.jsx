@@ -18,6 +18,7 @@ import OrdersLayout from './components/OrdersLayout';
 const LearningPage = lazy(() => import('./pages/LearningPage'));
 const QuizPage = lazy(() => import('./pages/QuizPage'));
 const CertificatePage = lazy(() => import('./pages/CertificatePage'));
+const ManageCoursesPage = lazy(() => import('./pages/ManageCoursesPage'));
 
 function ProfileLinkRedirect() {
   const navigate = useNavigate();
@@ -43,6 +44,7 @@ export default function App() {
         <Route path="/course/:slug" element={<CourseDetailPage />} />
       </Route>
       <Route element={<RequireAuth><CatalogLayout /></RequireAuth>}>
+        <Route path="/manage-courses" element={<ManageCoursesPage />} />
         <Route path="/course/:slug/certificate" element={<CertificatePage />} />
         <Route element={<OrdersLayout />}>
           <Route path="/course/:slug/payment" element={<PaymentMethodPage />} />
