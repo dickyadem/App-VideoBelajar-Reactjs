@@ -188,7 +188,48 @@ Progres belajar disimpan ke Firestore berdasarkan UID Firebase dan slug kelas, s
 
 ## Menjalankan secara lokal
 
-Salin `.env.example` menjadi `.env.local`, lalu isi variabel `VITE_FIREBASE_*` dari Firebase Console > Project settings > Your apps. Aktifkan provider **Email/Password** di Firebase Authentication. Isi `VITE_CLOUDINARY_CLOUD_NAME` dan `VITE_CLOUDINARY_UPLOAD_PRESET` dari Cloudinary untuk upload foto profil. Gunakan upload preset mode **Unsigned**; jangan masukkan API Secret ke frontend. File `.env.local` diabaikan Git. Restart development server setelah mengubah nilainya.
+### Environment (`.env.local`)
+
+Salin template di root proyek (PowerShell):
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+Isi `.env.local` dengan konfigurasi proyek Anda. Nilai berikut hanya placeholder:
+
+```dotenv
+# Firebase: Project settings > Your apps > SDK setup and configuration
+VITE_FIREBASE_API_KEY=your-firebase-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+VITE_FIREBASE_APP_ID=your-firebase-app-id
+
+# Cloudinary: upload foto profil
+VITE_CLOUDINARY_CLOUD_NAME=your-cloud-name
+VITE_CLOUDINARY_UPLOAD_PRESET=your-unsigned-upload-preset
+
+# Tersedia di template, tetapi belum digunakan aplikasi
+VITE_API_BASE_URL=
+```
+
+| Variabel | Kegunaan |
+| --- | --- |
+| `VITE_FIREBASE_API_KEY` | API key konfigurasi Firebase client |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Domain autentikasi proyek Firebase |
+| `VITE_FIREBASE_PROJECT_ID` | ID proyek untuk koneksi Firestore |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Nama bucket Firebase Storage sesuai konfigurasi proyek |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Sender ID dari konfigurasi Firebase |
+| `VITE_FIREBASE_APP_ID` | ID aplikasi web Firebase |
+| `VITE_CLOUDINARY_CLOUD_NAME` | Cloud tujuan upload foto profil |
+| `VITE_CLOUDINARY_UPLOAD_PRESET` | Upload preset **Unsigned** untuk foto profil |
+| `VITE_API_BASE_URL` | Belum digunakan; boleh dikosongkan karena CRUD memakai Firebase SDK |
+
+Konfigurasi Firebase dibaca oleh `src/firebase.js`. Kedua variabel Cloudinary diperlukan jika menggunakan fitur upload foto profil; tanpa keduanya fitur tersebut menampilkan pesan konfigurasi belum lengkap.
+
+Aktifkan provider **Email/Password** di Firebase Authentication. File `.env.local` diabaikan Git; jangan masukkan API Secret Cloudinary ke frontend. Restart development server setelah mengubah nilai environment.
 
 Untuk Vercel, tambahkan variabel dengan nama dan nilai yang sama melalui **Settings > Environment Variables** pada environment deployment yang digunakan, lalu deploy ulang. Konfigurasi `vercel.json` sudah mengatur build Vite dengan base `/` dan output `dist`.
 
